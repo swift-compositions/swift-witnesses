@@ -33,7 +33,7 @@ import Testing
 extension Witness.Test.Unit {
     @Test
     func `Untyped throws derives any Error failure type`() throws {
-        let error: any Error = CustomError.failed
+        let error: any Swift.Error = CustomError.failed
 
         // Sync bare `throws` — only compiles if the derived failure is `any Error`.
         let syncResult = ThrowsMatrixAPI.Result.bareSync(
@@ -42,6 +42,7 @@ extension Witness.Test.Unit {
         switch consume syncResult {
         case .bareSync(.failure(let captured)):
             #expect((captured as? CustomError) == .failed)
+
         default:
             Issue.record("Expected .bareSync(.failure)")
         }
@@ -53,6 +54,7 @@ extension Witness.Test.Unit {
         switch consume asyncResult {
         case .bareAsync(.failure(let captured)):
             #expect((captured as? CustomError) == .failed)
+
         default:
             Issue.record("Expected .bareAsync(.failure)")
         }
@@ -69,6 +71,7 @@ extension Witness.Test.Unit {
         switch consume syncResult {
         case .typedSync(.failure(let captured)):
             #expect(captured == .failed)
+
         default:
             Issue.record("Expected .typedSync(.failure)")
         }
@@ -79,6 +82,7 @@ extension Witness.Test.Unit {
         switch consume asyncResult {
         case .typedAsync(.failure(let captured)):
             #expect(captured == .failed)
+
         default:
             Issue.record("Expected .typedAsync(.failure)")
         }
@@ -94,6 +98,7 @@ extension Witness.Test.Unit {
         switch consume result {
         case .nonThrowing(.success(let value)):
             #expect(value == 42)
+
         default:
             Issue.record("Expected .nonThrowing(.success)")
         }

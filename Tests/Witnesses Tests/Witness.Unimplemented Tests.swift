@@ -19,7 +19,7 @@ extension Witness.Unimplemented {
     @Suite
     struct Test {
         @Suite struct Unit {}
-        @Suite struct `Edge Case` {}
+        @Suite struct EdgeCase {}
         @Suite struct Integration {}
         @Suite(.serialized) struct Performance {}
     }

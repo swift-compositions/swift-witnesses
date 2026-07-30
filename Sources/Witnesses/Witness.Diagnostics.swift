@@ -10,25 +10,26 @@
 //
 // ===----------------------------------------------------------------------===//
 
-#if canImport(Darwin)
-import Darwin
-#elseif canImport(Glibc)
-// Glibc declares `stderr` as a mutable global (`extern FILE *`), which Swift 6
-// data-race checking rejects at the reference site. The stream pointer is never
-// reassigned, `fputs` locks the stream internally, and the only write path here
-// is already serialized behind `reported`'s Mutex — `@preconcurrency` is the
-// established institute shape for this (swift-console, Console.Output.swift).
-@preconcurrency import Glibc
-#elseif canImport(Musl)
-// Same mutable-global `stderr` shape as Glibc.
-@preconcurrency import Musl
-#elseif os(Windows)
-// CRT vends `getenv`/`fputs` and `stderr` (as a computed accessor over
-// `__acrt_iob_func`), so no `@preconcurrency` is needed on this branch.
-import CRT
-#endif
 import Synchronization
 import Witness_Primitives
+
+#if canImport(Darwin)
+    import Darwin
+#elseif canImport(Glibc)
+    // Glibc declares `stderr` as a mutable global (`extern FILE *`), which Swift 6
+    // data-race checking rejects at the reference site. The stream pointer is never
+    // reassigned, `fputs` locks the stream internally, and the only write path here
+    // is already serialized behind `reported`'s Mutex — `@preconcurrency` is the
+    // established institute shape for this (swift-console, Console.Output.swift).
+    @preconcurrency import Glibc
+#elseif canImport(Musl)
+    // Same mutable-global `stderr` shape as Glibc.
+    @preconcurrency import Musl
+#elseif os(Windows)
+    // CRT vends `getenv`/`fputs` and `stderr` (as a computed accessor over
+    // `__acrt_iob_func`), so no `@preconcurrency` is needed on this branch.
+    import CRT
+#endif
 
 extension Witness {
     /// Loud diagnostics for the resolution layer.
@@ -64,14 +65,14 @@ extension Witness {
                 visible to the accessor's module. (di-composition-root-design.md §4.2)
                 """
             #if DEBUG
-            fatalError(message)
+                fatalError(message)
             #else
-            if strict { fatalError(message) }
-            let first = reported.withLock { $0.insert(ObjectIdentifier(K.self)).inserted }
-            if first {
-                message.withCString { _ = fputs($0, stderr) }
-                _ = fputs("\n", stderr)
-            }
+                if strict { fatalError(message) }
+                let first = reported.withLock { $0.insert(ObjectIdentifier(K.self)).inserted }
+                if first {
+                    message.withCString { _ = fputs($0, stderr) }
+                    _ = fputs("\n", stderr)
+                }
             #endif
         }
     }
