@@ -238,12 +238,12 @@ struct LifecycleComposedAPI: Sendable {
 struct UntypedExistentialSpellingAPI: Sendable {
     var implicitUntyped: @Sendable () throws -> Int
     var explicitAnySwiftError: @Sendable () throws(any Swift.Error) -> Int
-    // swiftlint:disable:next no_existential_throws
     // REASON: deliberately exercises the bare `any Error` spelling of the
     // untyped existential — this fixture's entire purpose is proving that
     // @Witness's `unimplemented()` recognizes it as equivalent to implicit
     // untyped `throws` rather than routing it through `Representable` as a
     // domain leaf error (swift-foundations/swift-witnesses#8).
+    // swiftlint:disable:next no_existential_throws
     var explicitAnyError: @Sendable () throws(any Error) -> Int
     var explicitSwiftError: @Sendable () throws(Swift.Error) -> Int
     var explicitError: @Sendable () throws(Error) -> Int
