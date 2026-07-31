@@ -34,6 +34,8 @@ let package = Package(
         .package(url: "https://github.com/swift-primitives/swift-finite-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-ownership-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-dependency-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-either-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-async-primitives.git", branch: "main"),
     ],
     targets: [
         .target(
@@ -44,6 +46,8 @@ let package = Package(
                 .product(name: "Source Primitives", package: "swift-source-primitives"),
                 .product(name: "Ownership Primitives", package: "swift-ownership-primitives"),
                 .product(name: "Dependency Primitives", package: "swift-dependency-primitives"),
+                .product(name: "Either Primitives", package: "swift-either-primitives"),
+                .product(name: "Async Lifecycle Primitives", package: "swift-async-primitives"),
             ]
         ),
         .target(
@@ -74,7 +78,9 @@ let package = Package(
         .testTarget(
             name: "Witnesses Tests",
             dependencies: [
-                "Witnesses"
+                "Witnesses",
+                .product(name: "Either Primitives", package: "swift-either-primitives"),
+                .product(name: "Async Lifecycle Primitives", package: "swift-async-primitives"),
             ]
         )
     ],

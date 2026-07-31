@@ -10,6 +10,8 @@
 //
 // ===----------------------------------------------------------------------===//
 
+import Async_Lifecycle_Primitives
+import Either_Primitives
 import Synchronization
 import Testing
 
@@ -593,6 +595,34 @@ extension Witness.Unimplemented.Test.Unit {
         var api = UnimplementedThrowsMatrixAPI.unimplemented()
         api.nonThrowing = { 42 }
         #expect(api.nonThrowing() == 42)
+    }
+}
+
+// MARK: - Either<Async.Lifecycle.Error, Leaf> Composition Tests
+//
+// Coverage for the C1 vehicle for the ruled witness-error shape
+// (swift-foundations/swift-witnesses#3, comment 5143943680, ratified by
+// comment 5143970225): `Either<Async.Lifecycle.Error, Leaf>` conforms to
+// `Witness.Unimplemented.Representable` when `Leaf` does, forwarding
+// `unimplemented()` into `.right(.notImplemented(...))`. "No implementation"
+// is never a lifecycle fact, so the placeholder must never resolve `.left`.
+
+extension Witness.Unimplemented.Test.Unit {
+    @Test
+    func `Lifecycle-composed operation throws right notImplemented instead of crashing`() {
+        let api = LifecycleComposedAPI.unimplemented()
+
+        do throws(Either<Async.Lifecycle.Error, LeafOperationError>) {
+            _ = try api.fetch()
+            Issue.record("Expected fetch to throw")
+        } catch {
+            guard case .right(.notImplemented(let inner)) = error else {
+                Issue.record("Expected .right(.notImplemented(_)), got \(error)")
+                return
+            }
+            #expect(inner.witness == "LifecycleComposedAPI")
+            #expect(inner.operation == "fetch()")
+        }
     }
 }
 

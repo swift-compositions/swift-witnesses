@@ -10,6 +10,8 @@
 //
 // ===----------------------------------------------------------------------===//
 
+import Async_Lifecycle_Primitives
+import Either_Primitives
 import Testing
 public import Witnesses
 
@@ -207,6 +209,17 @@ struct UnimplementedThrowsMatrixAPI: Sendable {
     var leafTyped: @Sendable () throws(LeafOperationError) -> Int
     var neverTyped: @Sendable () throws(Never) -> Int
     var nonThrowing: @Sendable () -> Int
+}
+
+/// Witness exercising the ruled `Either<Async.Lifecycle.Error, Leaf>`
+/// witness-error shape (swift-foundations/swift-witnesses#3, comment
+/// 5143943680, ratified by comment 5143970225): the lifecycle envelope on
+/// the left, the per-operation domain leaf on the right. `unimplemented()`
+/// must resolve into `.right(.notImplemented(...))` — "no implementation" is
+/// never a lifecycle fact.
+@Witness
+struct LifecycleComposedAPI: Sendable {
+    var fetch: @Sendable () throws(Either<Async.Lifecycle.Error, LeafOperationError>) -> Int
 }
 
 // MARK: - Reserved Case-Name Collision Fixture
