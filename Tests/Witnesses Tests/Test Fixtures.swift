@@ -129,8 +129,23 @@ struct IntGenerator: Sendable {
 }
 
 // MARK: - Foreign Error Type Fixture
+//
+// Conforms to `Witness.Unimplemented.Representable` per constraint C1: the
+// macro emits `throw .unimplemented(Witness.Unimplemented.Error(...))` for
+// every leaf-typed throwing property, including `ThrowsMatrixAPI.typedSync`
+// / `typedAsync` below, which are typed `throws(CustomError)`. The wrapping
+// case is named `notImplemented`, not `unimplemented`, following the
+// `LeafOperationError` convention (an enum case's implicit constructor and a
+// static func of the same name and parameter list collide).
 
-enum CustomError: Swift.Error, Sendable { case failed }
+enum CustomError: Witness.Unimplemented.Representable, Sendable, Equatable {
+    case failed
+    case notImplemented(Witness.Unimplemented.Error)
+
+    static func unimplemented(_ error: Witness.Unimplemented.Error) -> Self {
+        .notImplemented(error)
+    }
+}
 
 // MARK: - Throws-Shape Matrix Fixture
 
