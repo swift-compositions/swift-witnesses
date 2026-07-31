@@ -154,6 +154,46 @@ struct ThrowsMatrixAPI: Sendable {
     var nonThrowing: @Sendable () -> Int
 }
 
+// MARK: - Unimplemented Leaf-Error Fixture
+//
+// Regression coverage for the `unimplemented()` crash on leaf-typed throwing
+// properties: previously fell through to `fatalError`, crashing the process
+// (exit 133) instead of throwing — contradicting the macro's documented
+// "total (non-crashing) placeholder" contract. A leaf error conforming to
+// `Witness.Unimplemented.Representable` gives `unimplemented()` a total way
+// to produce a placeholder of the leaf's own type.
+
+/// A domain leaf error carrying its own failure case plus exactly one case
+/// wrapping `Witness.Unimplemented.Error`, per `Witness.Unimplemented.Representable`.
+///
+/// The wrapping case is named `notImplemented`, not `unimplemented` — an
+/// enum case's implicit constructor and a static func of the same name and
+/// parameter list collide ("invalid redeclaration") just like any other
+/// same-signature redeclaration, so it cannot share the protocol requirement's name.
+enum LeafOperationError: Witness.Unimplemented.Representable, Sendable {
+    case domainFailure
+    case notImplemented(Witness.Unimplemented.Error)
+
+    static func unimplemented(_ error: Witness.Unimplemented.Error) -> Self {
+        .notImplemented(error)
+    }
+}
+
+/// Witness exercising every throwing shape `unimplemented()` must handle:
+///
+/// - untyped `throws` → throws `Witness.Unimplemented.Error` directly
+/// - leaf-typed `throws(LeafOperationError)` → throws via `Representable`
+///   (the regression: previously crashed with `fatalError`)
+/// - `throws(Never)` → cannot throw; retains the `fatalError` placeholder
+/// - non-throwing → cannot throw; retains the `fatalError` placeholder
+@Witness
+struct UnimplementedThrowsMatrixAPI: Sendable {
+    var untyped: @Sendable () throws -> Int
+    var leafTyped: @Sendable () throws(LeafOperationError) -> Int
+    var neverTyped: @Sendable () throws(Never) -> Int
+    var nonThrowing: @Sendable () -> Int
+}
+
 // MARK: - Nested Type Fixture
 
 enum APINamespace {

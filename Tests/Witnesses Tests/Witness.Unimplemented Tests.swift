@@ -525,6 +525,77 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
+// MARK: - Leaf-Typed Throws Tests
+//
+// Regression coverage for the `unimplemented()` crash on leaf-typed throwing
+// properties (a domain error distinct from `Witness.Unimplemented.Error` and
+// `Never`). Previously fell through to `fatalError`, crashing the process
+// instead of throwing. `unimplemented()` now throws for a leaf-typed
+// operation exactly as it does for an untyped one, by asking the leaf error
+// (conforming to `Witness.Unimplemented.Representable`) to wrap the
+// diagnostic `Witness.Unimplemented.Error`.
+
+extension Witness.Unimplemented.Test.Unit {
+    @Test
+    func `Untyped throwing operation throws Witness Unimplemented Error`() {
+        let api = UnimplementedThrowsMatrixAPI.unimplemented()
+
+        #expect(throws: Witness.Unimplemented.Error.self) {
+            _ = try api.untyped()
+        }
+    }
+
+    @Test
+    func `Leaf-typed throwing operation throws instead of crashing`() {
+        let api = UnimplementedThrowsMatrixAPI.unimplemented()
+
+        do throws(LeafOperationError) {
+            _ = try api.leafTyped()
+            Issue.record("Expected leafTyped to throw")
+        } catch {
+            guard case .notImplemented(let inner) = error else {
+                Issue.record("Expected .notImplemented(_), got \(error)")
+                return
+            }
+            #expect(inner.witness == "UnimplementedThrowsMatrixAPI")
+            #expect(inner.operation == "leafTyped()")
+        }
+    }
+
+    @Test
+    func `Unimplemented failure message names the operation for untyped and leaf-typed`() {
+        let api = UnimplementedThrowsMatrixAPI.unimplemented()
+
+        do {
+            _ = try api.untyped()
+            Issue.record("Expected untyped to throw")
+        } catch {
+            #expect(String(describing: error).contains("untyped()"))
+        }
+
+        do throws(LeafOperationError) {
+            _ = try api.leafTyped()
+            Issue.record("Expected leafTyped to throw")
+        } catch {
+            #expect(String(describing: error).contains("leafTyped()"))
+        }
+    }
+
+    @Test
+    func `Never-typed operation is overridable and never needs to throw`() {
+        var api = UnimplementedThrowsMatrixAPI.unimplemented()
+        api.neverTyped = { 7 }
+        #expect(api.neverTyped() == 7)
+    }
+
+    @Test
+    func `Non-throwing operation is overridable`() {
+        var api = UnimplementedThrowsMatrixAPI.unimplemented()
+        api.nonThrowing = { 42 }
+        #expect(api.nonThrowing() == 42)
+    }
+}
+
 // MARK: - Nested Type Tests
 
 extension Witness.Unimplemented.Test.Unit {

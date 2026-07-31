@@ -334,6 +334,34 @@ extension WitnessMacro: ExtensionMacro {
 
 // MARK: - Unimplemented Member Generation
 
+/// Whether `property`'s `unimplemented()` closure can throw
+/// `Witness.Unimplemented.Error` directly: true for untyped `throws` (no
+/// `throwsType`) and for closures explicitly typed
+/// `throws(Witness.Unimplemented.Error)`.
+private func throwsUnimplementedErrorDirectly(_ property: ClosureProperty) -> Bool {
+    property.isThrowing
+        && (property.throwsType == nil || property.throwsType?.trimmedDescription == "Witness.Unimplemented.Error")
+}
+
+/// Whether `property`'s `unimplemented()` closure must throw via a domain leaf
+/// error conforming to `Witness.Unimplemented.Representable`: any typed
+/// `throws(E)` whose `E` is neither `Witness.Unimplemented.Error` (handled by
+/// `throwsUnimplementedErrorDirectly`) nor `Never` (which has no instances and
+/// therefore cannot be thrown — see the `fatalError` fallback in
+/// `generateUnimplementedClosure`).
+private func throwsUnimplementedErrorViaLeaf(_ property: ClosureProperty) -> Bool {
+    guard property.isThrowing, let throwsType = property.throwsType else { return false }
+    let typeName = throwsType.trimmedDescription
+    return typeName != "Witness.Unimplemented.Error" && typeName != "Never"
+}
+
+/// Whether `property`'s `unimplemented()` closure constructs a
+/// `Witness.Unimplemented.Error` — directly, or wrapped via
+/// `Witness.Unimplemented.Representable` — and therefore needs `location`.
+private func needsUnimplementedLocation(_ property: ClosureProperty) -> Bool {
+    throwsUnimplementedErrorDirectly(property) || throwsUnimplementedErrorViaLeaf(property)
+}
+
 private func generateUnimplementedMember(
     structName: String,
     closureProperties: [ClosureProperty],
@@ -344,10 +372,11 @@ private func generateUnimplementedMember(
     let accessModifier = isPublic ? "public " : ""
     let inlinableAttr = inlinable ? "@inlinable\n    " : ""
 
-    // Check if any closure can throw Witness.Unimplemented.Error (needs Source.Location)
-    let needsSourceLocation = closureProperties.contains { property in
-        property.isThrowing && (property.throwsType == nil || property.throwsType?.trimmedDescription == "Witness.Unimplemented.Error")
-    }
+    // Check if any closure constructs a Witness.Unimplemented.Error — directly
+    // (untyped throws, or throws(Witness.Unimplemented.Error)) or wrapped via
+    // Witness.Unimplemented.Representable (leaf-typed throws) — and therefore
+    // needs Source.Location.
+    let needsSourceLocation = closureProperties.contains(where: needsUnimplementedLocation)
 
     // Generate closure initializers
     let closureInits = closureProperties.map { property in
@@ -1192,9 +1221,13 @@ private func generateUnimplementedClosure(for property: ClosureProperty, structN
     let returnType = property.returnType.trimmedDescription
     let hasConsumingParams = property.parameters.contains { $0.ownership == .consuming }
 
-    // Can only throw Witness.Unimplemented.Error when the closure's error type matches
-    let canThrowUnimplemented = property.isThrowing && (property.throwsType == nil || property.throwsType?.trimmedDescription == "Witness.Unimplemented.Error")
-    let needsFatalError = !canThrowUnimplemented
+    // Can throw Witness.Unimplemented.Error directly when the closure's error
+    // type matches (untyped throws, or throws(Witness.Unimplemented.Error)).
+    let canThrowUnimplemented = throwsUnimplementedErrorDirectly(property)
+    // Can throw a domain leaf error wrapping Witness.Unimplemented.Error via
+    // Witness.Unimplemented.Representable (per-operation leaf-error support).
+    let canThrowViaLeaf = throwsUnimplementedErrorViaLeaf(property)
+    let needsFatalError = !canThrowUnimplemented && !canThrowViaLeaf
 
     // Generate closure parameter list.
     // Consuming params need named bindings when using fatalError (so they can be consumed).
@@ -1222,6 +1255,22 @@ private func generateUnimplementedClosure(for property: ClosureProperty, structN
                                 witness: "\(structName)",
                                 operation: "\(operationSignature)",
                                 location: location
+                            )
+                        }
+            """
+    } else if canThrowViaLeaf {
+        // Leaf-typed throwing closures: the leaf error type cannot gain a
+        // foreign Witness.Unimplemented.Error case, so it is asked (via
+        // Representable) to wrap one instead. Leading-dot `.unimplemented`
+        // resolves against the closure's own throws(<Leaf>) context.
+        return """
+            \(initLabel): \(closureStart)
+                            throw .unimplemented(
+                                Witness.Unimplemented.Error(
+                                    witness: "\(structName)",
+                                    operation: "\(operationSignature)",
+                                    location: location
+                                )
                             )
                         }
             """
