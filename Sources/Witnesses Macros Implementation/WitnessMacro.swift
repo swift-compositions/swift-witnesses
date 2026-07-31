@@ -1083,22 +1083,40 @@ private func generateCallsCases(for properties: [ClosureProperty]) -> String {
     }.joined(separator: "\n            ")
 }
 
+/// Member names that `Finite.Enumerable` conformance fixes on the generated
+/// `Case` enum: `count` and `ordinal` are protocol requirements
+/// (`Finite.Enumerable.count`, `Finite.Enumerable.ordinal`); `allCases` comes
+/// from its default `CaseIterable` extension. A witness operation sharing one
+/// of these names collides with the protocol-driven member — an enum case
+/// and a static/instance member of the same name are always a redeclaration
+/// in Swift, regardless of how the member's value is computed. The protocol
+/// requirement's name cannot move, so the case identifier used *inside*
+/// `Case` is escaped instead; the outer `Calls` enum (which does not conform
+/// to `Finite.Enumerable`) is unaffected and keeps the operation's exact name.
+private let reservedCaseEnumMemberNames: Set<String> = ["count", "ordinal", "allCases"]
+
+/// The case identifier used inside the generated `Case` enum for an
+/// operation, escaping a collision with `reservedCaseEnumMemberNames`.
+private func caseEnumCaseName(for methodName: String) -> String {
+    reservedCaseEnumMemberNames.contains(methodName) ? "\(methodName)_" : methodName
+}
+
 /// Generates the Case enum (Finite.Enumerable discriminant without associated values).
 private func generateCaseEnum(for properties: [ClosureProperty]) -> String {
     let caseCount = properties.count
-    let caseCases = properties.map { "case \($0.methodName)" }.joined(separator: "\n                ")
+    let caseCases = properties.map { "case \(caseEnumCaseName(for: $0.methodName))" }.joined(separator: "\n                ")
     let ordinalCases = properties.enumerated().map { i, p in
-        "case .\(p.methodName): Ordinal_Primitives.Ordinal(\(i))"
+        "case .\(caseEnumCaseName(for: p.methodName)): Ordinal_Primitives.Ordinal(\(i))"
     }.joined(separator: "\n                    ")
 
     let initCases: String
     if properties.count == 1 {
-        initCases = "default: self = .\(properties[0].methodName)"
+        initCases = "default: self = .\(caseEnumCaseName(for: properties[0].methodName))"
     } else {
         let explicit = properties.dropLast().enumerated().map { i, p in
-            "case \(i): self = .\(p.methodName)"
+            "case \(i): self = .\(caseEnumCaseName(for: p.methodName))"
         }.joined(separator: "\n                    ")
-        initCases = explicit + "\n                    default: self = .\(properties.last!.methodName)"
+        initCases = explicit + "\n                    default: self = .\(caseEnumCaseName(for: properties.last!.methodName))"
     }
 
     return """
@@ -1127,7 +1145,7 @@ private func generateCaseEnum(for properties: [ClosureProperty]) -> String {
 
 /// Generates the Calls → Case property.
 private func generateCallsCaseProperty(for properties: [ClosureProperty]) -> String {
-    let cases = properties.map { "case .\($0.methodName): .\($0.methodName)" }
+    let cases = properties.map { "case .\($0.methodName): .\(caseEnumCaseName(for: $0.methodName))" }
         .joined(separator: "\n                ")
     return """
         @inlinable

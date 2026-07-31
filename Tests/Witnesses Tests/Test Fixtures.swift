@@ -194,6 +194,21 @@ struct UnimplementedThrowsMatrixAPI: Sendable {
     var nonThrowing: @Sendable () -> Int
 }
 
+// MARK: - Reserved Case-Name Collision Fixture
+//
+// Regression coverage for `invalid redeclaration of 'count'`: a witness
+// operation literally named `count` collided with the generated `Case`
+// enum's own `count` (the `Finite.Enumerable.count` protocol requirement).
+// Per-resource client families legitimately declare `count`/`list`
+// operations, so this blocked their adoption.
+
+/// Witness with an operation literally named `count`.
+@Witness
+struct CountedOperationsAPI: Sendable {
+    var count: @Sendable () throws(Witness.Unimplemented.Error) -> Int
+    var fetch: @Sendable (_ id: Int) throws(Witness.Unimplemented.Error) -> String
+}
+
 // MARK: - Nested Type Fixture
 
 enum APINamespace {
