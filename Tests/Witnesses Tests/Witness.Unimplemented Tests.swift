@@ -598,6 +598,80 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
+// MARK: - Untyped-Existential Spelling Tests
+//
+// Regression coverage: `throws(any Swift.Error)` and equivalent spellings of
+// the untyped existential must throw `Witness.Unimplemented.Error` directly,
+// exactly like implicit untyped `throws` — never routed through
+// `Representable` as if they were a domain leaf error.
+
+extension Witness.Unimplemented.Test.Unit {
+    @Test
+    func `Every untyped existential spelling throws Witness Unimplemented Error directly`() {
+        let api = UntypedExistentialSpellingAPI.unimplemented()
+
+        #expect(throws: Witness.Unimplemented.Error.self) {
+            _ = try api.implicitUntyped()
+        }
+        #expect(throws: Witness.Unimplemented.Error.self) {
+            _ = try api.explicitAnySwiftError()
+        }
+        #expect(throws: Witness.Unimplemented.Error.self) {
+            _ = try api.explicitAnyError()
+        }
+        #expect(throws: Witness.Unimplemented.Error.self) {
+            _ = try api.explicitSwiftError()
+        }
+        #expect(throws: Witness.Unimplemented.Error.self) {
+            _ = try api.explicitError()
+        }
+    }
+}
+
+// MARK: - Typed Leaf Near-Miss Tests
+//
+// Near-miss companion to the untyped-existential spelling tests above: a
+// genuinely typed leaf error must still take the `Representable` path, both
+// directly and through the ratified `Either<Async.Lifecycle.Error, Leaf>`
+// composition — proving the untyped-existential recognition does not
+// overreach into typed leaf errors.
+
+extension Witness.Unimplemented.Test.Unit {
+    @Test
+    func `Genuinely typed domain leaf error still routes through Representable`() {
+        let api = TypedLeafNearMissAPI.unimplemented()
+
+        do throws(LeafOperationError) {
+            _ = try api.domainLeaf()
+            Issue.record("Expected domainLeaf to throw")
+        } catch {
+            guard case .notImplemented(let inner) = error else {
+                Issue.record("Expected .notImplemented(_), got \(error)")
+                return
+            }
+            #expect(inner.witness == "TypedLeafNearMissAPI")
+            #expect(inner.operation == "domainLeaf()")
+        }
+    }
+
+    @Test
+    func `Genuinely typed lifecycle-composed leaf error still routes through Representable`() {
+        let api = TypedLeafNearMissAPI.unimplemented()
+
+        do throws(Either<Async.Lifecycle.Error, LeafOperationError>) {
+            _ = try api.lifecycleComposedLeaf()
+            Issue.record("Expected lifecycleComposedLeaf to throw")
+        } catch {
+            guard case .right(.notImplemented(let inner)) = error else {
+                Issue.record("Expected .right(.notImplemented(_)), got \(error)")
+                return
+            }
+            #expect(inner.witness == "TypedLeafNearMissAPI")
+            #expect(inner.operation == "lifecycleComposedLeaf()")
+        }
+    }
+}
+
 // MARK: - Either<Async.Lifecycle.Error, Leaf> Composition Tests
 //
 // Coverage for the C1 vehicle for the ruled witness-error shape

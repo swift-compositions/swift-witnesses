@@ -222,6 +222,40 @@ struct LifecycleComposedAPI: Sendable {
     var fetch: @Sendable () throws(Either<Async.Lifecycle.Error, LeafOperationError>) -> Int
 }
 
+// MARK: - Untyped-Existential Spelling Fixture
+//
+// Regression coverage for `throwsUnimplementedErrorDirectly` treating an
+// explicit `throws(any Swift.Error)` — and equivalent spellings of the
+// untyped existential — as a domain leaf error instead of recognizing it as
+// semantically identical to implicit untyped `throws`. Each property below
+// spells the untyped existential differently; `unimplemented()` must throw
+// `Witness.Unimplemented.Error` directly for every one, exactly as it does
+// for implicit `throws`, never routing through `Representable`.
+
+/// Witness exercising every spelling of the untyped `Swift.Error` existential
+/// that `unimplemented()` must treat identically to implicit `throws`.
+@Witness
+struct UntypedExistentialSpellingAPI: Sendable {
+    var implicitUntyped: @Sendable () throws -> Int
+    var explicitAnySwiftError: @Sendable () throws(any Swift.Error) -> Int
+    var explicitAnyError: @Sendable () throws(any Error) -> Int
+    var explicitSwiftError: @Sendable () throws(Swift.Error) -> Int
+    var explicitError: @Sendable () throws(Error) -> Int
+}
+
+/// Near-miss companion: a genuinely typed leaf error (not an existential
+/// spelling) must still take the leaf path through `Representable`, proving
+/// the untyped-existential recognition above does not overreach into typed
+/// leaf errors. Exercises both a `Witness.Unimplemented.Representable`
+/// conformer directly and via the ratified `Either<Async.Lifecycle.Error,
+/// Leaf>` composition (swift-foundations/swift-witnesses#3, comment
+/// 5143970225).
+@Witness
+struct TypedLeafNearMissAPI: Sendable {
+    var domainLeaf: @Sendable () throws(LeafOperationError) -> Int
+    var lifecycleComposedLeaf: @Sendable () throws(Either<Async.Lifecycle.Error, LeafOperationError>) -> Int
+}
+
 // MARK: - Reserved Case-Name Collision Fixture
 //
 // Regression coverage for `invalid redeclaration of 'count'`: a witness

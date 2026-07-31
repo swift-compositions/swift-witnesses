@@ -334,25 +334,47 @@ extension WitnessMacro: ExtensionMacro {
 
 // MARK: - Unimplemented Member Generation
 
+/// Spellings of the untyped `Swift.Error` existential that are semantically
+/// identical to implicit untyped `throws` for `unimplemented()` generation
+/// purposes: `throws(any Swift.Error)`, `throws(any Error)`,
+/// `throws(Swift.Error)`, and `throws(Error)` are all the boxed existential,
+/// not a domain leaf error, so none of them can route through
+/// `Witness.Unimplemented.Representable`.
+private let untypedErrorExistentialSpellings: Set<String> = [
+    "any Swift.Error",
+    "any Error",
+    "Swift.Error",
+    "Error",
+]
+
 /// Whether `property`'s `unimplemented()` closure can throw
 /// `Witness.Unimplemented.Error` directly: true for untyped `throws` (no
-/// `throwsType`) and for closures explicitly typed
-/// `throws(Witness.Unimplemented.Error)`.
+/// `throwsType`), for closures explicitly typed
+/// `throws(Witness.Unimplemented.Error)`, and for closures explicitly typed
+/// with any spelling of the untyped `any Swift.Error` existential (see
+/// `untypedErrorExistentialSpellings`) — those are equivalent to implicit
+/// `throws`, not a domain leaf error.
 private func throwsUnimplementedErrorDirectly(_ property: ClosureProperty) -> Bool {
-    property.isThrowing
-        && (property.throwsType == nil || property.throwsType?.trimmedDescription == "Witness.Unimplemented.Error")
+    guard property.isThrowing else { return false }
+    guard let throwsType = property.throwsType else { return true }
+    let typeName = throwsType.trimmedDescription
+    return typeName == "Witness.Unimplemented.Error"
+        || untypedErrorExistentialSpellings.contains(typeName)
 }
 
 /// Whether `property`'s `unimplemented()` closure must throw via a domain leaf
 /// error conforming to `Witness.Unimplemented.Representable`: any typed
-/// `throws(E)` whose `E` is neither `Witness.Unimplemented.Error` (handled by
-/// `throwsUnimplementedErrorDirectly`) nor `Never` (which has no instances and
-/// therefore cannot be thrown — see the `fatalError` fallback in
+/// `throws(E)` whose `E` is neither `Witness.Unimplemented.Error`, an
+/// untyped-existential spelling (both handled by
+/// `throwsUnimplementedErrorDirectly`), nor `Never` (which has no instances
+/// and therefore cannot be thrown — see the `fatalError` fallback in
 /// `generateUnimplementedClosure`).
 private func throwsUnimplementedErrorViaLeaf(_ property: ClosureProperty) -> Bool {
     guard property.isThrowing, let throwsType = property.throwsType else { return false }
     let typeName = throwsType.trimmedDescription
-    return typeName != "Witness.Unimplemented.Error" && typeName != "Never"
+    return typeName != "Witness.Unimplemented.Error"
+        && typeName != "Never"
+        && !untypedErrorExistentialSpellings.contains(typeName)
 }
 
 /// Whether `property`'s `unimplemented()` closure constructs a
