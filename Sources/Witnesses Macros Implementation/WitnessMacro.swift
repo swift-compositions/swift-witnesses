@@ -336,10 +336,10 @@ extension WitnessMacro: ExtensionMacro {
 
 /// Spellings of the untyped `Swift.Error` existential that are semantically
 /// identical to implicit untyped `throws` for `unimplemented()` generation
-/// purposes: `throws(any Swift.Error)`, `throws(any Error)`,
-/// `throws(Swift.Error)`, and `throws(Error)` are all the boxed existential,
-/// not a domain leaf error, so none of them can route through
-/// `Witness.Unimplemented.Representable`.
+/// purposes: qualified and unqualified, `any`-prefixed and bare — all are
+/// the boxed existential, not a domain leaf error, so none of them can
+/// route through `Witness.Unimplemented.Representable`. See
+/// `untypedErrorExistentialSpellings` below for the exact set.
 private let untypedErrorExistentialSpellings: Set<String> = [
     "any Swift.Error",
     "any Error",
