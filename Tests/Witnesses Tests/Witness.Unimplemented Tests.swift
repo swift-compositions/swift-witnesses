@@ -672,6 +672,43 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
+// MARK: - Line-Wrapped Untyped-Existential Tests
+//
+// Regression coverage for the stripe-standard reproducer
+// (swift-foundations/swift-witnesses#8 follow-up): a closure-typed stored
+// property whose `throws(any Swift.Error)` clause is wrapped across lines
+// must still throw `Witness.Unimplemented.Error` directly, and a genuinely
+// typed leaf error wrapped the same way must still route through
+// `Representable`.
+
+extension Witness.Unimplemented.Test.Unit {
+    @Test
+    func `Line-wrapped untyped existential throws Witness Unimplemented Error directly`() async {
+        let api = LineWrappedUntypedExistentialAPI.unimplemented()
+
+        await #expect(throws: Witness.Unimplemented.Error.self) {
+            _ = try await api.create(0)
+        }
+    }
+
+    @Test
+    func `Line-wrapped typed leaf error still routes through Representable`() async {
+        let api = LineWrappedTypedLeafNearMissAPI.unimplemented()
+
+        do throws(LeafOperationError) {
+            _ = try await api.create(0)
+            Issue.record("Expected create to throw")
+        } catch {
+            guard case .notImplemented(let inner) = error else {
+                Issue.record("Expected .notImplemented(_), got \(error)")
+                return
+            }
+            #expect(inner.witness == "LineWrappedTypedLeafNearMissAPI")
+            #expect(inner.operation == "create(request:)")
+        }
+    }
+}
+
 // MARK: - Either<Async.Lifecycle.Error, Leaf> Composition Tests
 //
 // Coverage for the C1 vehicle for the ruled witness-error shape

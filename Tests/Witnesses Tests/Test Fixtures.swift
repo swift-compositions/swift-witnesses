@@ -262,6 +262,41 @@ struct TypedLeafNearMissAPI: Sendable {
     var lifecycleComposedLeaf: @Sendable () throws(Either<Async.Lifecycle.Error, LeafOperationError>) -> Int
 }
 
+// MARK: - Line-Wrapped Untyped-Existential Fixture
+//
+// Regression coverage for swift-stripe-standard's `Stripe Webhook Endpoints
+// Types Client.swift` shape (swift-foundations/swift-witnesses#8 follow-up):
+// a closure-typed stored property whose `throws(any Swift.Error)` clause is
+// broken across lines by swift-format's line-wrapping (the token stream
+// carries a newline between `Swift` and `.Error`), read from the
+// function-type AST node rather than a declaration's throws clause. The
+// equivalence check must compare a normalized spelling, not raw
+// `trimmedDescription`, or the internal newline defeats the string match and
+// the property falls through to the leaf-error path where `any Error` has no
+// `unimplemented` member.
+
+/// Mirrors the stripe-standard reproducer: a `@Sendable` async closure
+/// property whose `throws(any Swift.Error)` clause is deliberately wrapped
+/// across lines exactly as swift-format emits it for a long parameter list.
+@Witness
+struct LineWrappedUntypedExistentialAPI: Sendable {
+    var create:
+        @Sendable (_ request: Int) async throws(any Swift
+            .Error) -> Int
+}
+
+/// Near-miss companion: a genuinely typed leaf error, also line-wrapped the
+/// same way, must still take the leaf path through `Representable` — proving
+/// the normalized-spelling fix does not overreach into typed leaf errors
+/// merely because their `throws(...)` clause happens to wrap too.
+@Witness
+struct LineWrappedTypedLeafNearMissAPI: Sendable {
+    var create:
+        @Sendable (_ request: Int) async throws(
+            LeafOperationError
+        ) -> Int
+}
+
 // MARK: - Reserved Case-Name Collision Fixture
 //
 // Regression coverage for `invalid redeclaration of 'count'`: a witness

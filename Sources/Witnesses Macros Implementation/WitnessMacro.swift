@@ -347,6 +347,39 @@ private let untypedErrorExistentialSpellings: Set<String> = [
     "Error",
 ]
 
+/// `untypedErrorExistentialSpellings`, with internal whitespace removed from
+/// each spelling, for comparison against `normalizedTypeSpelling(_:)`.
+private let normalizedUntypedErrorExistentialSpellings: Set<String> =
+    Set(untypedErrorExistentialSpellings.map(removingWhitespace))
+
+/// A thrown-type node's spelling with ALL whitespace (including internal
+/// newlines and indentation) removed, so a spelling equivalence check is
+/// insensitive to line-wrapping.
+///
+/// `TypeSyntax.trimmedDescription` only strips the leading/trailing trivia
+/// of the whole node — it does NOT collapse trivia BETWEEN the node's own
+/// tokens. A long closure-typed stored property's `throws(any Swift.Error)`
+/// clause routinely gets broken across lines by swift-format (e.g. `throws(any
+/// Swift\n    .Error)`), and that internal newline+indentation survives into
+/// `trimmedDescription` verbatim. Comparing that raw string against the exact
+/// literal spellings in `untypedErrorExistentialSpellings` then fails even
+/// though the type is semantically identical — this is what let
+/// swift-stripe-standard's line-wrapped `throws(any Swift.Error)` closure
+/// properties fall through to the leaf-error path, generating `throw
+/// .unimplemented(...)` against a plain `any Error` that has no such member
+/// (swift-foundations/swift-witnesses#8 follow-up). None of the spellings this
+/// macro cares about (`Witness.Unimplemented.Error`, `Never`, or any entry in
+/// `untypedErrorExistentialSpellings`) contain whitespace that is meaningful
+/// to preserve, so stripping it entirely — rather than merely collapsing
+/// runs — is safe.
+private func normalizedTypeSpelling(_ type: TypeSyntax) -> String {
+    removingWhitespace(type.trimmedDescription)
+}
+
+private func removingWhitespace(_ string: String) -> String {
+    string.filter { !$0.isWhitespace }
+}
+
 /// Whether `property`'s `unimplemented()` closure can throw
 /// `Witness.Unimplemented.Error` directly: true for untyped `throws` (no
 /// `throwsType`), for closures explicitly typed
@@ -357,9 +390,9 @@ private let untypedErrorExistentialSpellings: Set<String> = [
 private func throwsUnimplementedErrorDirectly(_ property: ClosureProperty) -> Bool {
     guard property.isThrowing else { return false }
     guard let throwsType = property.throwsType else { return true }
-    let typeName = throwsType.trimmedDescription
+    let typeName = normalizedTypeSpelling(throwsType)
     return typeName == "Witness.Unimplemented.Error"
-        || untypedErrorExistentialSpellings.contains(typeName)
+        || normalizedUntypedErrorExistentialSpellings.contains(typeName)
 }
 
 /// Whether `property`'s `unimplemented()` closure must throw via a domain leaf
@@ -371,10 +404,10 @@ private func throwsUnimplementedErrorDirectly(_ property: ClosureProperty) -> Bo
 /// `generateUnimplementedClosure`).
 private func throwsUnimplementedErrorViaLeaf(_ property: ClosureProperty) -> Bool {
     guard property.isThrowing, let throwsType = property.throwsType else { return false }
-    let typeName = throwsType.trimmedDescription
+    let typeName = normalizedTypeSpelling(throwsType)
     return typeName != "Witness.Unimplemented.Error"
         && typeName != "Never"
-        && !untypedErrorExistentialSpellings.contains(typeName)
+        && !normalizedUntypedErrorExistentialSpellings.contains(typeName)
 }
 
 /// Whether `property`'s `unimplemented()` closure constructs a
