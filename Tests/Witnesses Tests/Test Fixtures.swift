@@ -278,6 +278,10 @@ struct TypedLeafNearMissAPI: Sendable {
 /// Mirrors the stripe-standard reproducer: a `@Sendable` async closure
 /// property whose `throws(any Swift.Error)` clause is deliberately wrapped
 /// across lines exactly as swift-format emits it for a long parameter list.
+// swift-format-ignore
+// REASON: the line break inside `throws(any Swift\n    .Error)` is the exact
+// shape under test — swift-format would otherwise collapse it back onto one
+// line, defeating the regression coverage.
 @Witness
 struct LineWrappedUntypedExistentialAPI: Sendable {
     var create:
@@ -289,6 +293,9 @@ struct LineWrappedUntypedExistentialAPI: Sendable {
 /// same way, must still take the leaf path through `Representable` — proving
 /// the normalized-spelling fix does not overreach into typed leaf errors
 /// merely because their `throws(...)` clause happens to wrap too.
+// swift-format-ignore
+// REASON: preserves the deliberate line-wrapped `throws(...)` clause under
+// test, matching the sibling untyped-existential fixture above.
 @Witness
 struct LineWrappedTypedLeafNearMissAPI: Sendable {
     var create:
