@@ -280,7 +280,7 @@ extension WitnessMacro: MemberAttributeMacro {
         // parameters, using the property's verbatim name. Storage and method
         // coexist with distinct Swift names. Consumers may call either form.
         //
-        // Empirical support: Experiments/witness-property-method-collision
+        // Empirical support: https://github.com/swift-institute/Experiments/tree/main/swift-witnesses--witness-property-method-collision
         //   V1 (different-label coexistence): CONFIRMED
         //   V5 (zero-arg collision): REFUTED — zero-arg closures skip method
         //     generation entirely (hasLabels is false), so no collision path.
