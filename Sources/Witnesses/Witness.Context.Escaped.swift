@@ -1,3 +1,11 @@
+// swift-format-ignore-file: AmbiguousTrailingClosureOverload
+//
+// The two `withEscaped(_:)` overloads below are distinguished by their
+// closure's effect signature (sync vs async) — the standard sync/async
+// overload family (P2b carve-out). swift-format's syntactic check sees only
+// the shared base name; call sites resolve unambiguously on the closure's
+// shape.
+//
 // ===----------------------------------------------------------------------===//
 //
 // This source file is part of the swift-foundations open source project
@@ -68,7 +76,7 @@ extension Witness.Context {
         try operation(Escaped())
     }
 
-    /// Capture the current witness context for use in escaping async closures.
+    /// Async variant of ``withEscaped(_:)``.
     ///
     /// - Parameter operation: An async closure that receives the captured context.
     /// - Returns: The result of the operation.

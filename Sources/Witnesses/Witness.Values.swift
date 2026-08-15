@@ -121,7 +121,8 @@ extension Witness.Values {
     ///   - mode: The execution mode determining default value selection.
     /// - Returns: The stored witness, or the key's default value based on mode.
     @usableFromInline
-    internal func value<K: Witness.Key>(for key: K.Type, mode: Witness.Context.Mode) -> K.Value where K.Value: Copyable {
+    internal func value<K: Witness.Key>(for key: K.Type, mode: Witness.Context.Mode) -> K.Value
+    where K.Value: Copyable {
         let id = ObjectIdentifier(K.self)
 
         // 1. Check explicit overrides
@@ -162,7 +163,8 @@ extension Witness.Values {
     ///   - mode: The execution mode determining default value selection.
     /// - Returns: The stored witness, or the key's default value based on mode.
     @usableFromInline
-    internal func value<K: Witness.Key.Test>(for key: K.Type, mode: Witness.Context.Mode) -> K.Value where K.Value: Copyable {
+    internal func value<K: Witness.Key.Test>(for key: K.Type, mode: Witness.Context.Mode) -> K.Value
+    where K.Value: Copyable {
         let id = ObjectIdentifier(K.self)
 
         // 1. Check explicit overrides

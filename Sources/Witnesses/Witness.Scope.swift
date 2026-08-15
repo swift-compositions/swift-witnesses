@@ -62,7 +62,10 @@ extension Witness {
         }
 
         deinit {
-            precondition(consumed, "Witness.Scope was never used. Call run(_:) to execute with the captured context.")
+            precondition(
+                consumed,
+                "Witness.Scope was never used. Call run(_:) to execute with the captured context."
+            )
         }
     }
 }

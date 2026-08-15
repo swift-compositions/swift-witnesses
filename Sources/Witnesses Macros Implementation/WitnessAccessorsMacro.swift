@@ -56,7 +56,11 @@ extension WitnessAccessorsMacro: PeerMacro {
 
         // Generate static accessor methods
         let accessorMethods = closureProperties.map { property in
-            generateStaticAccessor(for: property, structName: structName, accessModifier: accessModifier)
+            generateStaticAccessor(
+                for: property,
+                structName: structName,
+                accessModifier: accessModifier
+            )
         }.joined(separator: "\n\n    ")
 
         let extensionDecl: DeclSyntax = """
@@ -95,12 +99,15 @@ private struct AccessorClosureParameter {
     let isInout: Bool
 }
 
-private func extractClosurePropertiesForAccessors(from structDecl: StructDeclSyntax) -> [AccessorClosureProperty] {
+private func extractClosurePropertiesForAccessors(
+    from structDecl: StructDeclSyntax
+) -> [AccessorClosureProperty] {
     var properties: [AccessorClosureProperty] = []
 
     for member in structDecl.memberBlock.members {
         guard let varDecl = member.decl.as(VariableDeclSyntax.self),
-            varDecl.bindingSpecifier.tokenKind == .keyword(.var) || varDecl.bindingSpecifier.tokenKind == .keyword(.let),
+            varDecl.bindingSpecifier.tokenKind == .keyword(.var)
+                || varDecl.bindingSpecifier.tokenKind == .keyword(.let),
             let binding = varDecl.bindings.first,
             let identifier = binding.pattern.as(IdentifierPatternSyntax.self),
             let typeAnnotation = binding.typeAnnotation,
@@ -137,7 +144,9 @@ private func extractFunctionTypeForAccessors(from type: TypeSyntax) -> FunctionT
     return nil
 }
 
-private func extractParametersForAccessors(from functionType: FunctionTypeSyntax) -> [AccessorClosureParameter] {
+private func extractParametersForAccessors(
+    from functionType: FunctionTypeSyntax
+) -> [AccessorClosureParameter] {
     functionType.parameters.map { param in
         let label: String? = {
             if let second = param.secondName?.text {

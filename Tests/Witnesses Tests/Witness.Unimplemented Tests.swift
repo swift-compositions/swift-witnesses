@@ -156,7 +156,8 @@ extension Witness.Unimplemented.Test.Unit {
     func `Noncopyable driver Result carries actual return types`() throws {
         let handle = NoncopyableHandle(fd: 42)
         let result = NoncopyableDriverAPI.Result.create(
-            Standard_Library_Extensions.Result<NoncopyableHandle, Witness.Unimplemented.Error>.success(handle)
+            Standard_Library_Extensions.Result<NoncopyableHandle, Witness.Unimplemented.Error>
+                .success(handle)
         )
         switch consume result {
         case .create(.success(let h)):
@@ -276,7 +277,8 @@ extension Witness.Unimplemented.Test.Unit {
     }
 
     @Test
-    func `Optional closure observe before passes nil through`() throws(Witness.Unimplemented.Error) {
+    func `Optional closure observe before passes nil through`() throws(Witness.Unimplemented.Error)
+    {
         let log = Synchronization.Mutex<[String]>([])
         let base = OptionalCallbackAPI(
             onEvent: { _ in },
