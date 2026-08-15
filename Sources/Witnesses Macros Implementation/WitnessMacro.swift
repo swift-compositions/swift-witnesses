@@ -156,7 +156,9 @@ extension WitnessMacro: MemberMacro {
             } ?? false
 
         // Generate Calls enum
-        members.append(contentsOf: generateCallsMembers(for: closureProperties, isSendable: isSendable))
+        members.append(
+            contentsOf: generateCallsMembers(for: closureProperties, isSendable: isSendable)
+        )
 
         // Typealias for use in nested types (Observe) where bare struct name may not resolve
         if isPublic {
@@ -169,7 +171,14 @@ extension WitnessMacro: MemberMacro {
 
         // Generate Observe accessor struct and property
         members.append(
-            generateObserveStruct(for: closureProperties, nonClosureProperties: nonClosureProperties, structName: structName, isPublic: isPublic, inlinable: inlinable, isSendable: isSendable)
+            generateObserveStruct(
+                for: closureProperties,
+                nonClosureProperties: nonClosureProperties,
+                structName: structName,
+                isPublic: isPublic,
+                inlinable: inlinable,
+                isSendable: isSendable
+            )
         )
         members.append(generateObserveProperty())
 
@@ -268,8 +277,12 @@ extension WitnessMacro: MemberAttributeMacro {
         // Skip for properties with restricted access (package/private/fileprivate) —
         // @usableFromInline is incompatible with those access levels.
         if let structDecl = declaration.as(StructDeclSyntax.self) {
-            let isPublicStruct = structDecl.modifiers.contains { $0.name.tokenKind == .keyword(.public) }
-            let isPublicMember = varDecl.modifiers.contains { $0.name.tokenKind == .keyword(.public) }
+            let isPublicStruct = structDecl.modifiers.contains {
+                $0.name.tokenKind == .keyword(.public)
+            }
+            let isPublicMember = varDecl.modifiers.contains {
+                $0.name.tokenKind == .keyword(.public)
+            }
             if isPublicStruct && !isPublicMember && !hasRestrictedAccess(varDecl.modifiers) {
                 attributes.append(AttributeSyntax(stringLiteral: "@usableFromInline"))
             }
@@ -309,18 +322,23 @@ extension WitnessMacro: ExtensionMacro {
         let alreadyConformsToWitnessProtocol =
             declaration.inheritanceClause?.inheritedTypes.contains { inherited in
                 let text = inherited.type.trimmedDescription
-                return text == "__WitnessProtocol" || text == "Witness.`Protocol`" || text == "Witness.Protocol" || text.hasSuffix(".__WitnessProtocol")
+                return text == "__WitnessProtocol" || text == "Witness.`Protocol`"
+                    || text == "Witness.Protocol" || text.hasSuffix(".__WitnessProtocol")
             } ?? false
 
         if !alreadyConformsToWitnessProtocol {
-            let witnessExt = try ExtensionDeclSyntax("extension \(type.trimmed): Witness_Primitives.__WitnessProtocol {}")
+            let witnessExt = try ExtensionDeclSyntax(
+                "extension \(type.trimmed): Witness_Primitives.__WitnessProtocol {}"
+            )
             extensions.append(witnessExt)
         }
 
         // Enums also conform to Optic.Prism.Accessible for composition support
         // Uses hoisted __OpticPrismAccessible since Optic.Prism.Accessible is a typealias
         if declaration.is(EnumDeclSyntax.self) {
-            let prismExt = try ExtensionDeclSyntax("extension \(type.trimmed): Optic_Primitives.__OpticPrismAccessible {}")
+            let prismExt = try ExtensionDeclSyntax(
+                "extension \(type.trimmed): Optic_Primitives.__OpticPrismAccessible {}"
+            )
             extensions.append(prismExt)
         }
 
@@ -451,7 +469,10 @@ private func generateUnimplementedMember(
     }
     let allParams = paramParts.joined(separator: ",\n        ")
 
-    let allInits = joinInitArguments(nonClosureProperties: nonClosureProperties, closureInits: closureInits)
+    let allInits = joinInitArguments(
+        nonClosureProperties: nonClosureProperties,
+        closureInits: closureInits
+    )
 
     let locationCode =
         needsSourceLocation
@@ -501,7 +522,10 @@ private func generateMockMember(
         generateMockClosure(for: property, isPublic: isPublic)
     }.joined(separator: ",\n            ")
 
-    let allInits = joinInitArguments(nonClosureProperties: nonClosureProperties, closureInits: closureInits)
+    let allInits = joinInitArguments(
+        nonClosureProperties: nonClosureProperties,
+        closureInits: closureInits
+    )
 
     return """
         /// Creates a mock witness with fixed return values.
@@ -833,7 +857,8 @@ extension ClosureParameter {
 /// Whether the declaration has restricted access (package, private, or fileprivate).
 private func hasRestrictedAccess(_ modifiers: DeclModifierListSyntax) -> Bool {
     modifiers.contains {
-        $0.name.tokenKind == .keyword(.package) || $0.name.tokenKind == .keyword(.private) || $0.name.tokenKind == .keyword(.fileprivate)
+        $0.name.tokenKind == .keyword(.package) || $0.name.tokenKind == .keyword(.private)
+            || $0.name.tokenKind == .keyword(.fileprivate)
     }
 }
 
@@ -854,7 +879,8 @@ private func extractClosureProperties(from structDecl: StructDeclSyntax) -> [Clo
 
     for member in structDecl.memberBlock.members {
         guard let varDecl = member.decl.as(VariableDeclSyntax.self),
-            varDecl.bindingSpecifier.tokenKind == .keyword(.var) || varDecl.bindingSpecifier.tokenKind == .keyword(.let),
+            varDecl.bindingSpecifier.tokenKind == .keyword(.var)
+                || varDecl.bindingSpecifier.tokenKind == .keyword(.let),
             let binding = varDecl.bindings.first,
             let identifier = binding.pattern.as(IdentifierPatternSyntax.self),
             let typeAnnotation = binding.typeAnnotation,
@@ -1027,7 +1053,10 @@ private func generateMethod(for property: ClosureProperty, inlinable: Bool = tru
 }
 
 /// Generates callAsFunction() for .generator derive mode.
-private func generateCallAsFunction(for property: ClosureProperty, inlinable: Bool = true) -> DeclSyntax {
+private func generateCallAsFunction(
+    for property: ClosureProperty,
+    inlinable: Bool = true
+) -> DeclSyntax {
     let inlinableAttr = inlinable ? "@inlinable\n        " : ""
     return """
         \(raw: inlinableAttr)public func callAsFunction(\(raw: property.methodParameterList))\(raw: property.effectSpecifiers)\(raw: property.returnClause) {
@@ -1053,7 +1082,10 @@ private func generateMethodSignature(name: String, functionType: FunctionTypeSyn
 
 // MARK: - Calls Enum Generation
 
-private func generateCallsMembers(for properties: [ClosureProperty], isSendable: Bool) -> [DeclSyntax] {
+private func generateCallsMembers(
+    for properties: [ClosureProperty],
+    isSendable: Bool
+) -> [DeclSyntax] {
     let actionCases = generateCallsCases(for: properties)
     let caseEnum = generateCaseEnum(for: properties)
     let caseProperty = generateCallsCaseProperty(for: properties)
@@ -1159,7 +1191,9 @@ private func caseEnumCaseName(for methodName: String) -> String {
 /// Generates the Case enum (Finite.Enumerable discriminant without associated values).
 private func generateCaseEnum(for properties: [ClosureProperty]) -> String {
     let caseCount = properties.count
-    let caseCases = properties.map { "case \(caseEnumCaseName(for: $0.methodName))" }.joined(separator: "\n                ")
+    let caseCases = properties.map { "case \(caseEnumCaseName(for: $0.methodName))" }.joined(
+        separator: "\n                "
+    )
     let ordinalCases = properties.enumerated().map { i, p in
         "case .\(caseEnumCaseName(for: p.methodName)): Ordinal_Primitives.Ordinal(\(i))"
     }.joined(separator: "\n                    ")
@@ -1171,7 +1205,9 @@ private func generateCaseEnum(for properties: [ClosureProperty]) -> String {
         let explicit = properties.dropLast().enumerated().map { i, p in
             "case \(i): self = .\(caseEnumCaseName(for: p.methodName))"
         }.joined(separator: "\n                    ")
-        initCases = explicit + "\n                    default: self = .\(caseEnumCaseName(for: properties.last!.methodName))"
+        initCases =
+            explicit
+            + "\n                    default: self = .\(caseEnumCaseName(for: properties.last!.methodName))"
     }
 
     return """
@@ -1200,8 +1236,10 @@ private func generateCaseEnum(for properties: [ClosureProperty]) -> String {
 
 /// Generates the Calls → Case property.
 private func generateCallsCaseProperty(for properties: [ClosureProperty]) -> String {
-    let cases = properties.map { "case .\($0.methodName): .\(caseEnumCaseName(for: $0.methodName))" }
-        .joined(separator: "\n                ")
+    let cases = properties.map {
+        "case .\($0.methodName): .\(caseEnumCaseName(for: $0.methodName))"
+    }
+    .joined(separator: "\n                ")
     return """
         @inlinable
                 public var `case`: Case {
@@ -1229,7 +1267,8 @@ private func generateResultEnum(for properties: [ClosureProperty]) -> String {
 private func generateTypedResultCase(for property: ClosureProperty) -> String {
     let returnType = property.returnType.trimmedDescription
     let errorType = property.derivedFailureType
-    return "case \(property.methodName)(Standard_Library_Extensions.Result<\(returnType), \(errorType)>)"
+    return
+        "case \(property.methodName)(Standard_Library_Extensions.Result<\(returnType), \(errorType)>)"
 }
 
 /// Generates prism properties for each closure property.
@@ -1258,7 +1297,8 @@ struct NonClosureProperty {
     let type: String
 }
 
-private func extractNonClosureProperties(from structDecl: StructDeclSyntax) -> [NonClosureProperty] {
+private func extractNonClosureProperties(from structDecl: StructDeclSyntax) -> [NonClosureProperty]
+{
     var properties: [NonClosureProperty] = []
     for member in structDecl.memberBlock.members {
         guard let varDecl = member.decl.as(VariableDeclSyntax.self),
@@ -1282,7 +1322,11 @@ private func extractNonClosureProperties(from structDecl: StructDeclSyntax) -> [
 
 // MARK: - Unimplemented Closure Generation
 
-private func generateUnimplementedClosure(for property: ClosureProperty, structName: String, isPublic: Bool) -> String {
+private func generateUnimplementedClosure(
+    for property: ClosureProperty,
+    structName: String,
+    isPublic: Bool
+) -> String {
     let initLabel = property.initLabel(isPublic: isPublic)
 
     // Optional closures: nil is the unimplemented state
@@ -1349,7 +1393,9 @@ private func generateUnimplementedClosure(for property: ClosureProperty, structN
             """
     } else if hasConsumingParams {
         // Non-throwing with consuming params: consume then fatalError
-        let consumeStatements = property.parameters.enumerated().compactMap { index, param -> String? in
+        let consumeStatements = property.parameters.enumerated().compactMap {
+            index,
+            param -> String? in
             guard param.ownership == .consuming else { return nil }
             return "_ = consume p\(index)"
         }.joined(separator: "\n                ")
@@ -1406,9 +1452,15 @@ private func generateObserveStruct(
         generateObserveClosure(for: $0, variant: .after, isPublic: isPublic)
     }
 
-    let bothInitArgs = (nonClosurePassthrough + bothClosures).joined(separator: ",\n                    ")
-    let beforeInitArgs = (nonClosurePassthrough + beforeClosures).joined(separator: ",\n                    ")
-    let afterInitArgs = (nonClosurePassthrough + afterClosures).joined(separator: ",\n                    ")
+    let bothInitArgs = (nonClosurePassthrough + bothClosures).joined(
+        separator: ",\n                    "
+    )
+    let beforeInitArgs = (nonClosurePassthrough + beforeClosures).joined(
+        separator: ",\n                    "
+    )
+    let afterInitArgs = (nonClosurePassthrough + afterClosures).joined(
+        separator: ",\n                    "
+    )
 
     let ufiAttr = inlinable ? "@usableFromInline\n            " : ""
     let inlinableAttr = inlinable ? "@inlinable\n            " : ""
@@ -1496,8 +1548,12 @@ private func generateObserveClosure(
                 innerType = optionalWrapped
             }
             if let attributed = innerType.as(AttributedTypeSyntax.self),
-                !attributed.attributes.contains(where: { $0.as(AttributeSyntax.self)?.attributeName.trimmedDescription == "concurrent" }),
-                attributed.attributes.contains(where: { $0.as(AttributeSyntax.self)?.attributeName.trimmedDescription == "Sendable" })
+                !attributed.attributes.contains(where: {
+                    $0.as(AttributeSyntax.self)?.attributeName.trimmedDescription == "concurrent"
+                }),
+                attributed.attributes.contains(where: {
+                    $0.as(AttributeSyntax.self)?.attributeName.trimmedDescription == "Sendable"
+                })
             {
                 return "\(initLabel): witness.\(property.name)"
             }

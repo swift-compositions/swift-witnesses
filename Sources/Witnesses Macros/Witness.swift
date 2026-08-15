@@ -173,7 +173,13 @@ extension Witness.Derive {
 /// ```
 @attached(member, names: arbitrary)
 @attached(memberAttribute)
-@attached(extension, conformances: Witness_Primitives.__WitnessProtocol, Optic_Primitives.__OpticPrismAccessible, names: named(unimplemented), named(mock))
+@attached(
+    extension,
+    conformances: Witness_Primitives.__WitnessProtocol,
+    Optic_Primitives.__OpticPrismAccessible,
+    names: named(unimplemented),
+    named(mock)
+)
 public macro Witness() =
     #externalMacro(
         module: "Witnesses_Macros_Implementation",
@@ -207,7 +213,13 @@ public macro Witness() =
 /// - Parameter derive: The derive modes to enable (e.g., `.mock`, `[.mock, .spy]`).
 @attached(member, names: arbitrary)
 @attached(memberAttribute)
-@attached(extension, conformances: Witness_Primitives.__WitnessProtocol, Optic_Primitives.__OpticPrismAccessible, names: named(unimplemented), named(mock))
+@attached(
+    extension,
+    conformances: Witness_Primitives.__WitnessProtocol,
+    Optic_Primitives.__OpticPrismAccessible,
+    names: named(unimplemented),
+    named(mock)
+)
 public macro Witness(_ derive: Witness.Derive) =
     #externalMacro(
         module: "Witnesses_Macros_Implementation",

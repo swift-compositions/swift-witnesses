@@ -19,7 +19,8 @@ public import Witnesses
 @Witness
 struct TestAPI: Sendable {
     var fetch: @Sendable (_ id: Int) async throws(Witness.Unimplemented.Error) -> String
-    var update: @Sendable (_ id: Int, _ value: String) async throws(Witness.Unimplemented.Error) -> Void
+    var update:
+        @Sendable (_ id: Int, _ value: String) async throws(Witness.Unimplemented.Error) -> Void
 }
 
 /// Test witness with mock derive option.
@@ -40,10 +41,14 @@ struct SomeHandle: Sendable {
 /// Witness with borrowing/consuming/inout parameter conventions.
 @Witness
 struct OwnershipAPI: Sendable {
-    var borrow: @Sendable (_ handle: borrowing SomeHandle) throws(Witness.Unimplemented.Error) -> Int
-    var consume: @Sendable (_ handle: consuming SomeHandle) throws(Witness.Unimplemented.Error) -> Void
+    var borrow:
+        @Sendable (_ handle: borrowing SomeHandle) throws(Witness.Unimplemented.Error) -> Int
+    var consume:
+        @Sendable (_ handle: consuming SomeHandle) throws(Witness.Unimplemented.Error) -> Void
     var mutate: @Sendable (_ buffer: inout [UInt8]) throws(Witness.Unimplemented.Error) -> Int
-    var mixed: @Sendable (_ handle: borrowing SomeHandle, _ count: Int, _ buffer: inout [UInt8]) throws(Witness.Unimplemented.Error) -> Void
+    var mixed:
+        @Sendable (_ handle: borrowing SomeHandle, _ count: Int, _ buffer: inout [UInt8])
+            throws(Witness.Unimplemented.Error) -> Void
 }
 
 // MARK: - ~Copyable Witness Fixtures
@@ -90,8 +95,11 @@ extension TokenProvider {
 struct DriverPatternAPI: Sendable {
     let capabilities: Int
     let create: @Sendable () throws(Witness.Unimplemented.Error) -> String
-    let operate: @Sendable (_ handle: borrowing SomeHandle, _ count: Int) throws(Witness.Unimplemented.Error) -> Void
-    let close: @Sendable (_ handle: consuming SomeHandle) throws(Witness.Unimplemented.Error) -> Void
+    let operate:
+        @Sendable (_ handle: borrowing SomeHandle, _ count: Int) throws(Witness.Unimplemented.Error)
+            -> Void
+    let close:
+        @Sendable (_ handle: consuming SomeHandle) throws(Witness.Unimplemented.Error) -> Void
 }
 
 // MARK: - ~Copyable Driver Pattern Fixture
@@ -106,8 +114,11 @@ struct NoncopyableHandle: ~Copyable, Sendable {
 @Witness
 struct NoncopyableDriverAPI: Sendable {
     let create: @Sendable () throws(Witness.Unimplemented.Error) -> NoncopyableHandle
-    let register: @Sendable (borrowing NoncopyableHandle, Int32) throws(Witness.Unimplemented.Error) -> Int
-    let poll: @Sendable (borrowing NoncopyableHandle, inout [Int32]) throws(Witness.Unimplemented.Error) -> Int
+    let register:
+        @Sendable (borrowing NoncopyableHandle, Int32) throws(Witness.Unimplemented.Error) -> Int
+    let poll:
+        @Sendable (borrowing NoncopyableHandle, inout [Int32]) throws(Witness.Unimplemented.Error)
+            -> Int
     let close: @Sendable (consuming NoncopyableHandle) -> Void
 }
 
@@ -259,7 +270,8 @@ struct UntypedExistentialSpellingAPI: Sendable {
 @Witness
 struct TypedLeafNearMissAPI: Sendable {
     var domainLeaf: @Sendable () throws(LeafOperationError) -> Int
-    var lifecycleComposedLeaf: @Sendable () throws(Either<Async.Lifecycle.Error, LeafOperationError>) -> Int
+    var lifecycleComposedLeaf:
+        @Sendable () throws(Either<Async.Lifecycle.Error, LeafOperationError>) -> Int
 }
 
 // MARK: - Line-Wrapped Untyped-Existential Fixture
@@ -355,7 +367,9 @@ struct OptionalCallbackAPI: Sendable {
 /// and compilable unimplemented() output.
 @Witness
 struct NonsendingAPI: Sendable {
-    var run: nonisolated(nonsending) @Sendable (_ id: Int) async throws(Witness.Unimplemented.Error) -> String
+    var run:
+        nonisolated(nonsending) @Sendable (_ id: Int) async throws(Witness.Unimplemented.Error) ->
+            String
     var shutdown: nonisolated(nonsending) @Sendable () async -> Void
     var sync: @Sendable () throws(Witness.Unimplemented.Error) -> Int
 }

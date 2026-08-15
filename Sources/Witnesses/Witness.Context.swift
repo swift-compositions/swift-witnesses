@@ -164,7 +164,9 @@ extension Witness.Context {
     ///
     /// - Parameter key: The key type to resolve.
     /// - Returns: A result containing the resolved value or a resolution error.
-    public static func value<K: Witness.Key>(_ key: K.Type) -> Result<K.Value, Witness.Resolution.Error> where K.Value: Copyable {
+    public static func value<K: Witness.Key>(
+        _ key: K.Type
+    ) -> Result<K.Value, Witness.Resolution.Error> where K.Value: Copyable {
         .success(_current.values.value(for: key, mode: _current.mode))
     }
 
