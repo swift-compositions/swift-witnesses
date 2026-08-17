@@ -168,6 +168,14 @@ extension Witness.Unimplemented.Test.Unit {
         }
     }
 
+    // Targeted opt-out for a compiler defect, not a semantic change: optimizing
+    // this exact function trips a SIL ownership-verifier abort (leak) in the
+    // CopyPropagation pass on Swift 6.4-dev/nightly release builds
+    // (-O -enable-default-cmo), crashing swift-frontend and the required
+    // Linux release CI leg. The fixture still compiles and runs on every leg;
+    // only optimization of this one function is suppressed.
+    // Tracked at https://github.com/swift-institute/Issues/issues/90.
+    @_optimize(none)
     @Test
     func `Noncopyable driver Observe after works with borrowing`() throws {
         let log = Synchronization.Mutex<[String]>([])
