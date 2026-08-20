@@ -1,16 +1,16 @@
-// swift-tools-version: 6.3.3
+// swift-tools-version: 6.4
 
-import PackageDescription
 import CompilerPluginSupport
+import PackageDescription
 
 let package = Package(
     name: "swift-witnesses",
     platforms: [
-        .macOS("27"),
-        .iOS("27"),
-        .tvOS("27"),
-        .watchOS("27"),
-        .visionOS("27"),
+        .macOS(.v27),
+        .iOS(.v27),
+        .tvOS(.v27),
+        .watchOS(.v27),
+        .visionOS(.v27),
     ],
     products: [
         .library(
@@ -28,14 +28,38 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "602.0.0"..<"603.0.0"),
-        .package(url: "https://github.com/swift-primitives/swift-witness-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-source-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-optic-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-finite-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-ownership-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-dependency-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-either-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-async-primitives.git", branch: "main"),
+        .package(
+            url: "https://github.com/swift-primitives/swift-witness-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-primitives/swift-source-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-primitives/swift-optic-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-primitives/swift-finite-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-primitives/swift-ownership-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-primitives/swift-dependency-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-primitives/swift-either-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-primitives/swift-async-primitives.git",
+            branch: "main"
+        ),
     ],
     targets: [
         .target(
@@ -71,7 +95,7 @@ let package = Package(
         .target(
             name: "Witnesses Test Support",
             dependencies: [
-                "Witnesses",
+                "Witnesses"
             ],
             path: "Tests/Support"
         ),
@@ -94,9 +118,9 @@ let package = Package(
                 // target ships in no product, so the unsafe flag never blocks
                 // consumers. Tracked at
                 // https://github.com/swift-institute/Issues/issues/90.
-                .unsafeFlags(["-Onone"], .when(configuration: .release)),
+                .unsafeFlags(["-Onone"], .when(configuration: .release))
             ]
-        )
+        ),
     ],
     swiftLanguageModes: [.v6]
 )
