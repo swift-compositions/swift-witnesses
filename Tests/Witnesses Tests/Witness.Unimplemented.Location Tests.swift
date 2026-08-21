@@ -1,15 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-foundations open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-foundations
-// project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Testing
 
 @testable import Witnesses
@@ -23,8 +11,6 @@ extension Source.Location {
         @Suite(.serialized) struct Performance {}
     }
 }
-
-// MARK: - Unit Tests
 
 extension Source.Location.Test.Unit {
     @Test
@@ -71,8 +57,6 @@ extension Source.Location.Test.Unit {
     }
 }
 
-// MARK: - Edge Case Tests
-
 extension Source.Location.Test.EdgeCase {
     @Test
     func `Location with empty fileID`() {
@@ -101,8 +85,7 @@ extension Source.Location.Test.EdgeCase {
             line: Int(UInt32.max),
             column: 1
         )
-        // UInt32.max is a valid positive line number, so Line.Number never throws.
-        // swiftlint:disable:next force_try
+
         let expectedLine = try! Text.Line.Number(Int(UInt32.max))
         #expect(location.line == expectedLine)
     }
@@ -127,8 +110,6 @@ extension Source.Location.Test.EdgeCase {
         #expect(location.filePath == nil)
     }
 }
-
-// MARK: - Integration Tests
 
 extension Source.Location.Test.Integration {
     @Test
@@ -180,12 +161,10 @@ extension Source.Location.Test.Integration {
     }
 }
 
-// MARK: - Performance Tests
-
 extension Source.Location.Test.Performance {
     @Test
     func `Location creation`() {
-        // Warmup
+
         for _ in 0..<100 {
             _ = Source.Location(
                 fileID: "Test.swift",
@@ -193,7 +172,7 @@ extension Source.Location.Test.Performance {
                 column: 7
             )
         }
-        // Measured
+
         for _ in 0..<1000 {
             for i in 0..<100 {
                 _ = Source.Location(

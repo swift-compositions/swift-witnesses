@@ -1,20 +1,6 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-foundations open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-foundations
-// project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Testing
 
 @testable import Witnesses
-
-// MARK: - Enum Expansion Fixtures
 
 @Witness
 enum TestCalls: Sendable {
@@ -23,7 +9,6 @@ enum TestCalls: Sendable {
     case transform(input: Int, scale: Double)
 }
 
-/// Enum with keyword case names to test escaping.
 @Witness
 enum KeywordCalls: Sendable {
     case `default`
@@ -36,8 +21,6 @@ extension Witness.Test {
         @Suite struct Unit {}
     }
 }
-
-// MARK: - Unit Tests
 
 extension Witness.Test.Enum.Unit {
     @Test

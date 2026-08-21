@@ -1,60 +1,28 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-foundations open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-foundations
-// project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Synchronization
 import Witness_Primitives
 
 #if canImport(Darwin)
     import Darwin
 #elseif canImport(Glibc)
-    // Glibc declares `stderr` as a mutable global (`extern FILE *`), which Swift 6
-    // data-race checking rejects at the reference site. The stream pointer is never
-    // reassigned, `fputs` locks the stream internally, and the only write path here
-    // is already serialized behind `reported`'s Mutex — `@preconcurrency` is the
-    // established institute shape for this (swift-console, Console.Output.swift).
+
     @preconcurrency import Glibc
 #elseif canImport(Musl)
-    // Same mutable-global `stderr` shape as Glibc.
+
     @preconcurrency import Musl
 #elseif os(Windows)
-    // CRT vends `getenv`/`fputs` and `stderr` (as a computed accessor over
-    // `__acrt_iob_func`), so no `@preconcurrency` is needed on this branch.
+
     import CRT
 #endif
 
 extension Witness {
-    /// Loud diagnostics for the resolution layer.
-    ///
-    /// The silent channel this closes: a ``Witness/Key/Test``-only key
-    /// resolved in `.live` mode serves `testValue` with no report — a test
-    /// default masquerading as domain behavior in production (incident class
-    /// I2, `di-composition-root-design.md` §4.2). The diagnostic never
-    /// resolves through the witness system itself.
+
     internal enum Diagnostics {
-        /// Keys already reported in this process (release-mode report-once).
+
         private static let reported = Mutex<Set<ObjectIdentifier>>([])
 
-        /// `DEPENDENCIES_STRICT=1` escalates the release-mode report to a
-        /// trap, for smoke runs that want DEBUG-strength failure.
         private static let strict: Bool =
             unsafe getenv("DEPENDENCIES_STRICT").map { unsafe String(cString: $0) == "1" } ?? false
 
-        /// Reports a test-only key's default being served in a live context.
-        ///
-        /// DEBUG builds trap — fail-fast in development, where this class is
-        /// cheap. RELEASE builds report once per key to stderr and serve the
-        /// default — availability-preserving: one forgotten key must not kill
-        /// a serving process; the named report makes it a log-grep, not a
-        /// debug round. `DEPENDENCIES_STRICT=1` traps in release.
         static func testDefaultServedInLive<K: Witness.Key.Test>(_ key: K.Type) {
             let message = """
                 [swift-witnesses] Test default served in LIVE context: key '\(K.self)' \

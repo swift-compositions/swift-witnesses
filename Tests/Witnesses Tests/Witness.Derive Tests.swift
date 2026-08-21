@@ -1,15 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-foundations open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-foundations
-// project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Testing
 
 @testable import Witnesses
@@ -24,26 +12,22 @@ extension Witness.Derive {
     }
 }
 
-// MARK: - Unit Tests
-
 extension Witness.Derive.Test.Unit {
     @Test
     func `Mock generates static method with value parameters`() async throws {
-        // mock() takes values, not closures
+
         let api = MockableAPI.mock(
             fetchUser: "Test User",
             getCount: 42
-                // deleteUser defaults to () since it returns Void
+
         )
 
-        // Values are returned regardless of input
         let user = try await api.fetchUser(id: 999)
         #expect(user == "Test User")
 
         let count = try api.getCount()
         #expect(count == 42)
 
-        // Void operations just work
         try await api.deleteUser(id: 1)
     }
 
@@ -69,7 +53,6 @@ extension Witness.Derive.Test.Unit {
             getCount: 0
         )
 
-        // Same value regardless of id
         let user1 = try await api.fetchUser(id: 1)
         let user2 = try await api.fetchUser(id: 999)
         let user3 = try await api.fetchUser(id: -1)
@@ -81,22 +64,18 @@ extension Witness.Derive.Test.Unit {
 
     @Test
     func `Mock also has unimplemented available`() async throws {
-        // Both mock() and unimplemented() are available
+
         let mockApi = MockableAPI.mock(fetchUser: "Test", getCount: 0)
         let unimplApi = MockableAPI.unimplemented()
 
-        // Mock works
         let result = try await mockApi.fetchUser(id: 1)
         #expect(result == "Test")
 
-        // Unimplemented throws
         await #expect(throws: Witness.Unimplemented.Error.self) {
             _ = try await unimplApi.fetchUser(id: 1)
         }
     }
 }
-
-// MARK: - Generator Tests
 
 extension Witness.Derive.Test.Unit {
     @Test
@@ -121,8 +100,6 @@ extension Witness.Derive.Test.Unit {
         }
     }
 }
-
-// MARK: - Edge Case Tests
 
 extension Witness.Derive.Test.EdgeCase {
     @Test
@@ -170,8 +147,6 @@ extension Witness.Derive.Test.EdgeCase {
     }
 }
 
-// MARK: - Integration Tests
-
 extension Witness.Derive.Test.Integration {
     @Test
     func `Mock in context scope`() async throws {
@@ -181,8 +156,7 @@ extension Witness.Derive.Test.Integration {
         )
 
         try await Witness.Context.with { _ in
-            // Can't test with MockableAPI directly as it doesn't conform to Witness.Key
-            // This test validates that mock instances work correctly
+
         } operation: {
             let user = try await mockApi.fetchUser(id: 1)
             #expect(user == "Context User")
@@ -202,16 +176,14 @@ extension Witness.Derive.Test.Integration {
     }
 }
 
-// MARK: - Performance Tests
-
 extension Witness.Derive.Test.Performance {
     @Test
     func `Mock creation`() {
-        // Warmup
+
         for _ in 0..<100 {
             _ = MockableAPI.mock(fetchUser: "User", getCount: 42)
         }
-        // Measured
+
         for _ in 0..<1000 {
             _ = MockableAPI.mock(fetchUser: "User", getCount: 42)
         }
@@ -221,11 +193,10 @@ extension Witness.Derive.Test.Performance {
     func `Mock invocation`() async throws {
         let api = MockableAPI.mock(fetchUser: "User", getCount: 42)
 
-        // Warmup
         for _ in 0..<100 {
             _ = try await api.fetchUser(id: 1)
         }
-        // Measured
+
         for _ in 0..<1000 {
             _ = try await api.fetchUser(id: 1)
         }

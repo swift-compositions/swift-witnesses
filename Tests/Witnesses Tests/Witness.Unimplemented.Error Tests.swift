@@ -1,15 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-foundations open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-foundations
-// project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Testing
 
 @testable import Witnesses
@@ -23,8 +11,6 @@ extension Witness.Unimplemented.Error {
         @Suite(.serialized) struct Performance {}
     }
 }
-
-// MARK: - Unit Tests
 
 extension Witness.Unimplemented.Error.Test.Unit {
     @Test
@@ -102,8 +88,6 @@ extension Witness.Unimplemented.Error.Test.Unit {
     }
 }
 
-// MARK: - Edge Case Tests
-
 extension Witness.Unimplemented.Error.Test.EdgeCase {
     @Test
     func `Error with empty witness name`() {
@@ -174,8 +158,6 @@ extension Witness.Unimplemented.Error.Test.EdgeCase {
     }
 }
 
-// MARK: - Integration Tests
-
 extension Witness.Unimplemented.Error.Test.Integration {
     @Test
     func `Error equality`() {
@@ -223,7 +205,7 @@ extension Witness.Unimplemented.Error.Test.Integration {
             _ = try await api.fetch(id: 1)
             Issue.record("Expected error")
         } catch {
-            // Can be rethrown
+
             func rethrowError() throws(Witness.Unimplemented.Error) {
                 throw error
             }
@@ -235,8 +217,6 @@ extension Witness.Unimplemented.Error.Test.Integration {
     }
 }
 
-// MARK: - Performance Tests
-
 extension Witness.Unimplemented.Error.Test.Performance {
     @Test
     func `Error creation`() {
@@ -245,7 +225,7 @@ extension Witness.Unimplemented.Error.Test.Performance {
             line: 42,
             column: 7
         )
-        // Warmup
+
         for _ in 0..<100 {
             _ = Witness.Unimplemented.Error(
                 witness: "FileSystem",
@@ -253,7 +233,7 @@ extension Witness.Unimplemented.Error.Test.Performance {
                 location: location
             )
         }
-        // Measured
+
         for _ in 0..<1000 {
             _ = Witness.Unimplemented.Error(
                 witness: "FileSystem",
@@ -275,11 +255,11 @@ extension Witness.Unimplemented.Error.Test.Performance {
             operation: "open(path:flags:)",
             location: location
         )
-        // Warmup
+
         for _ in 0..<100 {
             _ = error.description
         }
-        // Measured
+
         for _ in 0..<1000 {
             _ = error.description
         }

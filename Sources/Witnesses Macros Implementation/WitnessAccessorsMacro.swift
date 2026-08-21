@@ -1,26 +1,9 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-foundations open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-foundations
-// project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-// MARK: - WitnessAccessorsMacro
-
-/// Macro that generates static service accessor methods for a witness type.
 public struct WitnessAccessorsMacro {}
-
-// MARK: - PeerMacro
 
 extension WitnessAccessorsMacro: PeerMacro {
     public static func expansion(
@@ -54,7 +37,6 @@ extension WitnessAccessorsMacro: PeerMacro {
         let isPublic = structDecl.modifiers.contains { $0.name.tokenKind == .keyword(.public) }
         let accessModifier = isPublic ? "public " : ""
 
-        // Generate static accessor methods
         let accessorMethods = closureProperties.map { property in
             generateStaticAccessor(
                 for: property,
@@ -72,8 +54,6 @@ extension WitnessAccessorsMacro: PeerMacro {
         return [extensionDecl]
     }
 }
-
-// MARK: - Helpers
 
 private struct AccessorClosureProperty {
     let name: String
@@ -176,24 +156,21 @@ private func generateStaticAccessor(
     structName: String,
     accessModifier: String
 ) -> String {
-    // Build parameter list
+
     let parameters = property.parameters.enumerated().map { index, param in
         let label = param.label ?? "_"
         let internalName = "p\(index)"
         return "\(label) \(internalName): \(param.type)"
     }.joined(separator: ", ")
 
-    // Build effect specifiers
     var effectSpecs: [String] = []
     if property.isAsync { effectSpecs.append("async") }
     if property.isThrowing { effectSpecs.append("throws") }
     let effectSpecifiers = effectSpecs.isEmpty ? "" : " " + effectSpecs.joined(separator: " ")
 
-    // Build return clause
     let returnType = property.returnType.trimmedDescription
     let returnClause = returnType == "Void" ? "" : " -> \(returnType)"
 
-    // Build call arguments
     let callArguments = property.parameters.enumerated().map { index, param in
         let prefix = param.isInout ? "&" : ""
         let label = param.label.map { "\($0): " } ?? ""
@@ -210,8 +187,6 @@ private func generateStaticAccessor(
             }
         """
 }
-
-// MARK: - Diagnostics
 
 enum WitnessAccessorsDiagnostic: String, DiagnosticMessage {
     case requiresStruct

@@ -1,21 +1,8 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-foundations open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-foundations
-// project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Async_Lifecycle_Primitives
 import Either_Primitives
 import Testing
 public import Witnesses
 
-/// Test witness for basic operations.
 @Witness
 struct TestAPI: Sendable {
     var fetch: @Sendable (_ id: Int) async throws(Witness.Unimplemented.Error) -> String
@@ -23,7 +10,6 @@ struct TestAPI: Sendable {
         @Sendable (_ id: Int, _ value: String) async throws(Witness.Unimplemented.Error) -> Void
 }
 
-/// Test witness with mock derive option.
 @Witness(.mock)
 struct MockableAPI: Sendable {
     var fetchUser: @Sendable (_ id: Int) async throws(Witness.Unimplemented.Error) -> String
@@ -31,14 +17,10 @@ struct MockableAPI: Sendable {
     var deleteUser: @Sendable (_ id: Int) async throws(Witness.Unimplemented.Error) -> Void
 }
 
-// MARK: - Ownership Convention Fixtures
-
-/// A simple handle type for testing ownership parameter conventions.
 struct SomeHandle: Sendable {
     let id: Int
 }
 
-/// Witness with borrowing/consuming/inout parameter conventions.
 @Witness
 struct OwnershipAPI: Sendable {
     var borrow:
@@ -51,18 +33,10 @@ struct OwnershipAPI: Sendable {
             throws(Witness.Unimplemented.Error) -> Void
 }
 
-// MARK: - ~Copyable Witness Fixtures
-
-/// A ~Copyable witness value representing a unique, non-shareable resource.
 struct UniqueHandle: ~Copyable, Sendable {
     let id: Int
 }
 
-/// Witness key providing ~Copyable values.
-///
-/// Because `Value` is `~Copyable`, the key must provide explicit implementations
-/// for `liveValue`, `testValue`, and `previewValue` — the protocol defaults
-/// are constrained to `where Value: Copyable`.
 struct HandleProvider: Witness.Key, Sendable {
 }
 
@@ -74,7 +48,6 @@ extension HandleProvider {
     static var previewValue: UniqueHandle { UniqueHandle(id: 50) }
 }
 
-/// A second ~Copyable key to test multi-key independence.
 struct TokenProvider: Witness.Key, Sendable {
 }
 
@@ -86,11 +59,6 @@ extension TokenProvider {
     static var previewValue: UniqueHandle { UniqueHandle(id: 5000) }
 }
 
-// MARK: - Copyable Witness Fixtures
-
-// MARK: - Driver Pattern Fixtures (let closures, non-closure properties)
-
-/// Witness with let closures and non-closure properties (IO driver pattern).
 @Witness
 struct DriverPatternAPI: Sendable {
     let capabilities: Int
@@ -102,15 +70,10 @@ struct DriverPatternAPI: Sendable {
         @Sendable (_ handle: consuming SomeHandle) throws(Witness.Unimplemented.Error) -> Void
 }
 
-// MARK: - ~Copyable Driver Pattern Fixture
-
-/// A ~Copyable handle mimicking IO.Event.Driver.Handle.
 struct NoncopyableHandle: ~Copyable, Sendable {
     let fd: Int32
 }
 
-/// Witness with ~Copyable ownership patterns matching IO.Event.Driver's shape.
-/// Tests the omission pattern: borrowing/consuming/inout params are omitted from Calls.
 @Witness
 struct NoncopyableDriverAPI: Sendable {
     let create: @Sendable () throws(Witness.Unimplemented.Error) -> NoncopyableHandle
@@ -122,9 +85,6 @@ struct NoncopyableDriverAPI: Sendable {
     let close: @Sendable (consuming NoncopyableHandle) -> Void
 }
 
-// MARK: - Existing Init Fixture
-
-/// Witness with existing init (macro should skip init generation).
 @Witness
 struct ExistingInitAPI: Sendable {
     var fetch: @Sendable (_ id: Int) throws(Witness.Unimplemented.Error) -> String
@@ -134,22 +94,10 @@ struct ExistingInitAPI: Sendable {
     }
 }
 
-// MARK: - Generator Pattern Fixture
-
 @Witness(.generator)
 struct IntGenerator: Sendable {
     var generate: @Sendable () throws(Witness.Unimplemented.Error) -> Int
 }
-
-// MARK: - Foreign Error Type Fixture
-//
-// Conforms to `Witness.Unimplemented.Representable` per constraint C1: the
-// macro emits `throw .unimplemented(Witness.Unimplemented.Error(...))` for
-// every leaf-typed throwing property, including `ThrowsMatrixAPI.typedSync`
-// / `typedAsync` below, which are typed `throws(CustomError)`. The wrapping
-// case is named `notImplemented`, not `unimplemented`, following the
-// `LeafOperationError` convention (an enum case's implicit constructor and a
-// static func of the same name and parameter list collide).
 
 enum CustomError: Witness.Unimplemented.Representable, Sendable, Equatable {
     case failed
@@ -160,19 +108,6 @@ enum CustomError: Witness.Unimplemented.Representable, Sendable, Equatable {
     }
 }
 
-// MARK: - Throws-Shape Matrix Fixture
-
-/// Witness exercising every throwing shape a closure field can take, pinning the
-/// macro's derived failure type for the generated `Result` / `Outcome`:
-///
-/// - untyped `throws` → `any Swift.Error` (the regression: previously derived
-///   `Never`, which made generated `Result<T, Never>.failure(error)` fail to
-///   compile in observe code — `any Error` is not convertible to `Never`)
-/// - typed `throws(E)` → `E`
-/// - non-throwing → `Never`
-///
-/// Covered across both sync and async. Merely compiling this fixture exercises
-/// the observe-body codegen for the untyped-throws case.
 @Witness
 struct ThrowsMatrixAPI: Sendable {
     var bareSync: @Sendable () throws -> Int
@@ -182,22 +117,6 @@ struct ThrowsMatrixAPI: Sendable {
     var nonThrowing: @Sendable () -> Int
 }
 
-// MARK: - Unimplemented Leaf-Error Fixture
-//
-// Regression coverage for the `unimplemented()` crash on leaf-typed throwing
-// properties: previously fell through to `fatalError`, crashing the process
-// (exit 133) instead of throwing — contradicting the macro's documented
-// "total (non-crashing) placeholder" contract. A leaf error conforming to
-// `Witness.Unimplemented.Representable` gives `unimplemented()` a total way
-// to produce a placeholder of the leaf's own type.
-
-/// A domain leaf error carrying its own failure case plus exactly one case
-/// wrapping `Witness.Unimplemented.Error`, per `Witness.Unimplemented.Representable`.
-///
-/// The wrapping case is named `notImplemented`, not `unimplemented` — an
-/// enum case's implicit constructor and a static func of the same name and
-/// parameter list collide ("invalid redeclaration") just like any other
-/// same-signature redeclaration, so it cannot share the protocol requirement's name.
 enum LeafOperationError: Witness.Unimplemented.Representable, Sendable {
     case domainFailure
     case notImplemented(Witness.Unimplemented.Error)
@@ -207,13 +126,6 @@ enum LeafOperationError: Witness.Unimplemented.Representable, Sendable {
     }
 }
 
-/// Witness exercising every throwing shape `unimplemented()` must handle:
-///
-/// - untyped `throws` → throws `Witness.Unimplemented.Error` directly
-/// - leaf-typed `throws(LeafOperationError)` → throws via `Representable`
-///   (the regression: previously crashed with `fatalError`)
-/// - `throws(Never)` → cannot throw; retains the `fatalError` placeholder
-/// - non-throwing → cannot throw; retains the `fatalError` placeholder
 @Witness
 struct UnimplementedThrowsMatrixAPI: Sendable {
     var untyped: @Sendable () throws -> Int
@@ -222,51 +134,21 @@ struct UnimplementedThrowsMatrixAPI: Sendable {
     var nonThrowing: @Sendable () -> Int
 }
 
-/// Witness exercising the ruled `Either<Async.Lifecycle.Error, Leaf>`
-/// witness-error shape (swift-foundations/swift-witnesses#3, comment
-/// 5143943680, ratified by comment 5143970225): the lifecycle envelope on
-/// the left, the per-operation domain leaf on the right. `unimplemented()`
-/// must resolve into `.right(.notImplemented(...))` — "no implementation" is
-/// never a lifecycle fact.
 @Witness
 struct LifecycleComposedAPI: Sendable {
     var fetch: @Sendable () throws(Either<Async.Lifecycle.Error, LeafOperationError>) -> Int
 }
 
-// MARK: - Untyped-Existential Spelling Fixture
-//
-// Regression coverage for `throwsUnimplementedErrorDirectly` treating an
-// explicit `throws(any Swift.Error)` — and equivalent spellings of the
-// untyped existential — as a domain leaf error instead of recognizing it as
-// semantically identical to implicit untyped `throws`. Each property below
-// spells the untyped existential differently; `unimplemented()` must throw
-// `Witness.Unimplemented.Error` directly for every one, exactly as it does
-// for implicit `throws`, never routing through `Representable`.
-
-/// Witness exercising every spelling of the untyped `Swift.Error` existential
-/// that `unimplemented()` must treat identically to implicit `throws`.
 @Witness
 struct UntypedExistentialSpellingAPI: Sendable {
     var implicitUntyped: @Sendable () throws -> Int
     var explicitAnySwiftError: @Sendable () throws(any Swift.Error) -> Int
-    // REASON: deliberately exercises the bare `any Error` spelling of the
-    // untyped existential — this fixture's entire purpose is proving that
-    // @Witness's `unimplemented()` recognizes it as equivalent to implicit
-    // untyped `throws` rather than routing it through `Representable` as a
-    // domain leaf error (swift-foundations/swift-witnesses#8).
-    // swiftlint:disable:next no_existential_throws
+
     var explicitAnyError: @Sendable () throws(any Error) -> Int
     var explicitSwiftError: @Sendable () throws(Swift.Error) -> Int
     var explicitError: @Sendable () throws(Error) -> Int
 }
 
-/// Near-miss companion: a genuinely typed leaf error (not an existential
-/// spelling) must still take the leaf path through `Representable`, proving
-/// the untyped-existential recognition above does not overreach into typed
-/// leaf errors. Exercises both a `Witness.Unimplemented.Representable`
-/// conformer directly and via the ratified `Either<Async.Lifecycle.Error,
-/// Leaf>` composition (swift-foundations/swift-witnesses#3, comment
-/// 5143970225).
 @Witness
 struct TypedLeafNearMissAPI: Sendable {
     var domainLeaf: @Sendable () throws(LeafOperationError) -> Int
@@ -274,26 +156,6 @@ struct TypedLeafNearMissAPI: Sendable {
         @Sendable () throws(Either<Async.Lifecycle.Error, LeafOperationError>) -> Int
 }
 
-// MARK: - Line-Wrapped Untyped-Existential Fixture
-//
-// Regression coverage for swift-stripe-standard's `Stripe Webhook Endpoints
-// Types Client.swift` shape (swift-foundations/swift-witnesses#8 follow-up):
-// a closure-typed stored property whose `throws(any Swift.Error)` clause is
-// broken across lines by swift-format's line-wrapping (the token stream
-// carries a newline between `Swift` and `.Error`), read from the
-// function-type AST node rather than a declaration's throws clause. The
-// equivalence check must compare a normalized spelling, not raw
-// `trimmedDescription`, or the internal newline defeats the string match and
-// the property falls through to the leaf-error path where `any Error` has no
-// `unimplemented` member.
-
-// swift-format-ignore
-// REASON: the line break inside `throws(any Swift\n    .Error)` is the exact
-// shape under test — swift-format would otherwise collapse it back onto one
-// line, defeating the regression coverage.
-/// Mirrors the stripe-standard reproducer: a `@Sendable` async closure
-/// property whose `throws(any Swift.Error)` clause is deliberately wrapped
-/// across lines exactly as swift-format emits it for a long parameter list.
 @Witness
 struct LineWrappedUntypedExistentialAPI: Sendable {
     var create:
@@ -301,37 +163,16 @@ struct LineWrappedUntypedExistentialAPI: Sendable {
             .Error) -> Int
 }
 
-// swift-format-ignore
-// REASON: preserves the deliberate line-wrapped `throws(...)` clause under
-// test, matching the sibling untyped-existential fixture above.
-/// Near-miss companion: a genuinely typed leaf error, also line-wrapped the
-/// same way, must still take the leaf path through `Representable` — proving
-/// the normalized-spelling fix does not overreach into typed leaf errors
-/// merely because their `throws(...)` clause happens to wrap too.
 @Witness
 struct LineWrappedTypedLeafNearMissAPI: Sendable {
-    var create:
-        @Sendable (_ request: Int) async throws(
-            LeafOperationError
-        ) -> Int
+    var create: @Sendable (_ request: Int) async throws(LeafOperationError) -> Int
 }
 
-// MARK: - Reserved Case-Name Collision Fixture
-//
-// Regression coverage for `invalid redeclaration of 'count'`: a witness
-// operation literally named `count` collided with the generated `Case`
-// enum's own `count` (the `Finite.Enumerable.count` protocol requirement).
-// Per-resource client families legitimately declare `count`/`list`
-// operations, so this blocked their adoption.
-
-/// Witness with an operation literally named `count`.
 @Witness
 struct CountedOperationsAPI: Sendable {
     var count: @Sendable () throws(Witness.Unimplemented.Error) -> Int
     var fetch: @Sendable (_ id: Int) throws(Witness.Unimplemented.Error) -> String
 }
-
-// MARK: - Nested Type Fixture
 
 enum APINamespace {
 }
@@ -343,28 +184,12 @@ extension APINamespace {
     }
 }
 
-// MARK: - Optional Closure Fixture
-
-// WORKAROUND: Compound fixture names
-// WHY: All existing fixtures use compound names; changing one creates inconsistency
-// WHEN TO REMOVE: When all test fixtures are refactored to Nest.Name
-// TRACKING: No dedicated issue filed yet; revisit alongside a future [API-NAME-002] fixture-naming sweep.
-
-/// Witness with optional closure (e.g., IO.Completion.Wakeup.Channel pattern).
 @Witness
 struct OptionalCallbackAPI: Sendable {
     var onEvent: @Sendable (_ name: String) throws(Witness.Unimplemented.Error) -> Void
     var onClose: (@Sendable () -> Void)?
 }
 
-// MARK: - Nonisolated Nonsending Fixture
-
-/// Witness with nonisolated(nonsending) @Sendable async closures.
-///
-/// Under SE-0461, @Sendable async closure literals default to @concurrent.
-/// This fixture verifies that the @Witness macro correctly handles
-/// nonisolated(nonsending) closure types — generating passthrough in observe,
-/// and compilable unimplemented() output.
 @Witness
 struct NonsendingAPI: Sendable {
     var run:
@@ -374,23 +199,17 @@ struct NonsendingAPI: Sendable {
     var sync: @Sendable () throws(Witness.Unimplemented.Error) -> Int
 }
 
-/// Witness with optional nonisolated(nonsending) @Sendable async closure.
 @Witness
 struct OptionalNonsendingAPI: Sendable {
     var onEvent: @Sendable (_ name: String) throws(Witness.Unimplemented.Error) -> Void
     var onComplete: (nonisolated(nonsending) @Sendable () async -> Void)?
 }
 
-// MARK: - Access Level Fixture
-
-/// Witness with package property — verifies no @usableFromInline on restricted access.
 @Witness
 struct RestrictedAccessAPI: Sendable {
     package var restricted: @Sendable () -> Void
     var open: @Sendable () throws(Witness.Unimplemented.Error) -> Void
 }
-
-// MARK: - Witness.Key Fixtures
 
 extension TestAPI: Witness.Key {
     static var liveValue: TestAPI {

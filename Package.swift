@@ -107,17 +107,7 @@ let package = Package(
                 .product(name: "Async Lifecycle Primitives", package: "swift-async-primitives"),
             ],
             swiftSettings: [
-                // Toolchain-defect opt-out, not a semantic setting: the Swift
-                // 6.4-dev/nightly release optimizer introduces SIL ownership
-                // leaks compiling this test module (@Witness-generated observe
-                // closures and noncopyable fixtures), aborting swift-frontend —
-                // first in CopyPropagation, then in pre-OwnershipModelEliminator
-                // verification once the first site is suppressed. The class is
-                // module-pervasive, so release CI builds this test module
-                // unoptimized. The library products stay fully optimized; this
-                // target ships in no product, so the unsafe flag never blocks
-                // consumers. Tracked at
-                // https://github.com/swift-institute/Issues/issues/90.
+
                 .unsafeFlags(["-Onone"], .when(configuration: .release))
             ]
         ),

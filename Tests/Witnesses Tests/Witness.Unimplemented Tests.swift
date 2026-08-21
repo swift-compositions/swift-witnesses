@@ -1,15 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-foundations open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-foundations
-// project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Async_Lifecycle_Primitives
 import Either_Primitives
 import Synchronization
@@ -27,19 +15,15 @@ extension Witness.Unimplemented {
     }
 }
 
-// MARK: - Unit Tests
-
 extension Witness.Unimplemented.Test.Unit {
     @Test
     func `Macro-generated unimplemented throws on invocation`() async throws {
         let api = TestAPI.unimplemented()
 
-        // Calling fetch should throw Witness.Unimplemented.Error
         await #expect(throws: Witness.Unimplemented.Error.self) {
             _ = try await api.fetch(id: 1)
         }
 
-        // Calling update should throw Witness.Unimplemented.Error
         await #expect(throws: Witness.Unimplemented.Error.self) {
             try await api.update(id: 1, value: "test")
         }
@@ -62,21 +46,16 @@ extension Witness.Unimplemented.Test.Unit {
     func `Unimplemented witness can be partially overridden`() async throws {
         var api = TestAPI.unimplemented()
 
-        // Override only fetch
         api.fetch = { id in "Mocked result for \(id)" }
 
-        // fetch works
         let result = try await api.fetch(id: 42)
         #expect(result == "Mocked result for 42")
 
-        // update still throws
         await #expect(throws: Witness.Unimplemented.Error.self) {
             try await api.update(id: 1, value: "test")
         }
     }
 }
-
-// MARK: - Edge Case Tests
 
 extension Witness.Unimplemented.Test.EdgeCase {
     @Test
@@ -92,10 +71,10 @@ extension Witness.Unimplemented.Test.EdgeCase {
                 _ = try await api2.fetch(id: 1)
             } catch {
                 let error2 = error
-                // Both errors should have the same witness and operation
+
                 #expect(error1.witness == error2.witness)
                 #expect(error1.operation == error2.operation)
-                // But locations may differ (different lines)
+
             }
         }
     }
@@ -105,11 +84,9 @@ extension Witness.Unimplemented.Test.EdgeCase {
         var api = TestAPI.unimplemented()
         api.fetch = { _ in "overridden" }
 
-        // Overridden works
         let result = try await api.fetch(id: 1)
         #expect(result == "overridden")
 
-        // Non-overridden still throws
         await #expect(throws: Witness.Unimplemented.Error.self) {
             try await api.update(id: 1, value: "test")
         }
@@ -131,7 +108,7 @@ extension Witness.Unimplemented.Test.Unit {
 
     @Test
     func `Noncopyable driver Calls omits owned params`() {
-        // register takes (borrowing NoncopyableHandle, Int32) → only Int32 in Calls
+
         let action = NoncopyableDriverAPI.Calls.register(42)
         if case .register(let descriptor) = action {
             #expect(descriptor == 42)
@@ -139,15 +116,12 @@ extension Witness.Unimplemented.Test.Unit {
             Issue.record("Expected .register")
         }
 
-        // close takes (consuming NoncopyableHandle) → no associated values
         let closeCalls = NoncopyableDriverAPI.Calls.close
         #expect(closeCalls.case == .close)
 
-        // poll takes (borrowing NoncopyableHandle, inout [Int32]) → no associated values
         let pollCalls = NoncopyableDriverAPI.Calls.poll
         #expect(pollCalls.case == .poll)
 
-        // create has no params → no associated values
         let createCalls = NoncopyableDriverAPI.Calls.create
         #expect(createCalls.case == .create)
     }
@@ -168,13 +142,6 @@ extension Witness.Unimplemented.Test.Unit {
         }
     }
 
-    // Targeted opt-out for a compiler defect, not a semantic change: optimizing
-    // this exact function trips a SIL ownership-verifier abort (leak) in the
-    // CopyPropagation pass on Swift 6.4-dev/nightly release builds
-    // (-O -enable-default-cmo), crashing swift-frontend and the required
-    // Linux release CI leg. The fixture still compiles and runs on every leg;
-    // only optimization of this one function is suppressed.
-    // Tracked at https://github.com/swift-institute/Issues/issues/90.
     @_optimize(none)
     @Test
     func `Noncopyable driver Observe after works with borrowing`() throws {
@@ -192,7 +159,6 @@ extension Witness.Unimplemented.Test.Unit {
             }
         )
 
-        // This was previously impossible: observe.after with ~Copyable return types
         let observed = base.observe.after { outcome in
             log.withLock { $0.append("after:\(outcome.action.case)") }
         }
@@ -253,15 +219,12 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-// MARK: - Optional Closure Tests
-
 extension Witness.Unimplemented.Test.Unit {
     @Test
     func `Optional closure unimplemented produces nil`() {
         let api = OptionalCallbackAPI.unimplemented()
         #expect(api.onClose == nil)
 
-        // onEvent still throws
         #expect(throws: Witness.Unimplemented.Error.self) {
             try api.onEvent(name: "test")
         }
@@ -295,10 +258,9 @@ extension Witness.Unimplemented.Test.Unit {
         let observed = base.observe.before { action in
             log.withLock { $0.append("before:\(action.case)") }
         }
-        // onClose is nil — should remain nil after observe
+
         #expect(observed.onClose == nil)
 
-        // onEvent triggers observer
         try observed.onEvent(name: "test")
         let entries = log.withLock { $0 }
         #expect(entries == ["before:onEvent"])
@@ -315,7 +277,7 @@ extension Witness.Unimplemented.Test.Unit {
         let observed = base.observe.before { action in
             log.withLock { $0.append("before:\(action.case)") }
         }
-        // onClose is non-nil — should trigger observer and original
+
         observed.onClose?()
         #expect(closeCalled.withLock { $0 })
         let entries = log.withLock { $0 }
@@ -340,22 +302,17 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-// MARK: - Access Level Tests
-
 extension Witness.Unimplemented.Test.Unit {
     @Test
     func `Restricted access struct compiles and works`() {
-        // Compile-only: verifies that @Witness with package property
-        // doesn't produce @usableFromInline on the restricted property
+
         let api = RestrictedAccessAPI.unimplemented()
-        // open should throw
+
         #expect(throws: Witness.Unimplemented.Error.self) {
             try api.open()
         }
     }
 }
-
-// MARK: - Nonisolated Nonsending Tests
 
 extension Witness.Unimplemented.Test.Unit {
     @Test
@@ -398,8 +355,6 @@ extension Witness.Unimplemented.Test.Unit {
             log.withLock { $0.append("before:\(action.case)") }
         }
 
-        // Nonsending closures are passed through (no wrapper), so observation
-        // is skipped for run/shutdown. sync is observed normally.
         let syncResult = try observed.sync()
         #expect(syncResult == 42)
 
@@ -438,18 +393,14 @@ extension Witness.Unimplemented.Test.Unit {
             log.withLock { $0.append("before:\(action.case)") }
         }
 
-        // onComplete is nonisolated(nonsending) optional — passed through unchanged
         await observed.onComplete?()
         #expect(completeCalled.withLock { $0 })
 
-        // onEvent is a regular @Sendable closure — observation works
         try observed.onEvent(name: "test")
         let entries = log.withLock { $0 }
         #expect(entries == ["before:onEvent"])
     }
 }
-
-// MARK: - Observe Tests
 
 extension Witness.Unimplemented.Test.Unit {
     @Test
@@ -500,8 +451,6 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-// MARK: - ExistingInitAPI Tests
-
 extension Witness.Unimplemented.Test.Unit {
     @Test
     func `ExistingInitAPI compiles and works with custom init`() throws {
@@ -519,33 +468,20 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-// MARK: - Typed Throws Preservation Tests
-
 extension Witness.Unimplemented.Test.Unit {
     @Test
     func `Generated convenience method preserves typed throws`() async {
         let api = TestAPI.unimplemented()
 
-        // If typed throws is preserved, this do/catch compiles with typed error
         do throws(Witness.Unimplemented.Error) {
             _ = try await api.fetch(id: 1)
         } catch {
-            // error should be Witness.Unimplemented.Error, not any Error
+
             let _: Witness.Unimplemented.Error = error
             #expect(error.witness == "TestAPI")
         }
     }
 }
-
-// MARK: - Leaf-Typed Throws Tests
-//
-// Regression coverage for the `unimplemented()` crash on leaf-typed throwing
-// properties (a domain error distinct from `Witness.Unimplemented.Error` and
-// `Never`). Previously fell through to `fatalError`, crashing the process
-// instead of throwing. `unimplemented()` now throws for a leaf-typed
-// operation exactly as it does for an untyped one, by asking the leaf error
-// (conforming to `Witness.Unimplemented.Representable`) to wrap the
-// diagnostic `Witness.Unimplemented.Error`.
 
 extension Witness.Unimplemented.Test.Unit {
     @Test
@@ -608,13 +544,6 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-// MARK: - Untyped-Existential Spelling Tests
-//
-// Regression coverage: `throws(any Swift.Error)` and equivalent spellings of
-// the untyped existential must throw `Witness.Unimplemented.Error` directly,
-// exactly like implicit untyped `throws` — never routed through
-// `Representable` as if they were a domain leaf error.
-
 extension Witness.Unimplemented.Test.Unit {
     @Test
     func `Every untyped existential spelling throws Witness Unimplemented Error directly`() {
@@ -637,14 +566,6 @@ extension Witness.Unimplemented.Test.Unit {
         }
     }
 }
-
-// MARK: - Typed Leaf Near-Miss Tests
-//
-// Near-miss companion to the untyped-existential spelling tests above: a
-// genuinely typed leaf error must still take the `Representable` path, both
-// directly and through the ratified `Either<Async.Lifecycle.Error, Leaf>`
-// composition — proving the untyped-existential recognition does not
-// overreach into typed leaf errors.
 
 extension Witness.Unimplemented.Test.Unit {
     @Test
@@ -682,15 +603,6 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-// MARK: - Line-Wrapped Untyped-Existential Tests
-//
-// Regression coverage for the stripe-standard reproducer
-// (swift-foundations/swift-witnesses#8 follow-up): a closure-typed stored
-// property whose `throws(any Swift.Error)` clause is wrapped across lines
-// must still throw `Witness.Unimplemented.Error` directly, and a genuinely
-// typed leaf error wrapped the same way must still route through
-// `Representable`.
-
 extension Witness.Unimplemented.Test.Unit {
     @Test
     func `Line-wrapped untyped existential throws Witness Unimplemented Error directly`() async {
@@ -719,15 +631,6 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-// MARK: - Either<Async.Lifecycle.Error, Leaf> Composition Tests
-//
-// Coverage for the C1 vehicle for the ruled witness-error shape
-// (swift-foundations/swift-witnesses#3, comment 5143943680, ratified by
-// comment 5143970225): `Either<Async.Lifecycle.Error, Leaf>` conforms to
-// `Witness.Unimplemented.Representable` when `Leaf` does, forwarding
-// `unimplemented()` into `.right(.notImplemented(...))`. "No implementation"
-// is never a lifecycle fact, so the placeholder must never resolve `.left`.
-
 extension Witness.Unimplemented.Test.Unit {
     @Test
     func `Lifecycle-composed operation throws right notImplemented instead of crashing`() {
@@ -747,8 +650,6 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-// MARK: - Nested Type Tests
-
 extension Witness.Unimplemented.Test.Unit {
     @Test
     func `Nested witness struct compiles and works`() throws {
@@ -763,8 +664,6 @@ extension Witness.Unimplemented.Test.Unit {
         #expect(result == "nested-1")
     }
 }
-
-// MARK: - Integration Tests
 
 extension Witness.Unimplemented.Test.Integration {
     @Test
@@ -789,11 +688,9 @@ extension Witness.Unimplemented.Test.Integration {
         } operation: {
             let api = Witness.Context.current[TestAPI.self]
 
-            // fetch works
             let result = try await api.fetch(id: 5)
             #expect(result == "Context mocked 5")
 
-            // update throws
             await #expect(throws: Witness.Unimplemented.Error.self) {
                 try await api.update(id: 1, value: "test")
             }

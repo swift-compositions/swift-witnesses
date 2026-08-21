@@ -1,21 +1,7 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-foundations open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-foundations
-// project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import SwiftDiagnostics
 @_spi(RawSyntax) import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
-
-// MARK: - Enum Case Extraction
 
 struct EnumCase: Sendable {
     let name: String
@@ -58,17 +44,13 @@ func extractEnumCases(from enumDecl: EnumDeclSyntax) -> [EnumCase] {
     return cases
 }
 
-// MARK: - Enum Prism Generation
-
 func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclSyntax] {
     var members: [DeclSyntax] = []
 
-    // Generate direct computed properties for each case (zero-overhead extraction)
     for enumCase in cases {
         members.append(generateEnumComputedProperty(for: enumCase))
     }
 
-    // Generate Case discriminant enum (for iteration support)
     let caseCount = cases.count
     let escapedCaseNames = cases.map { escapeIdentifier($0.name) }
     let caseCases = escapedCaseNames.map { "case \($0)" }.joined(separator: "\n            ")
@@ -88,14 +70,6 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
     }.joined(separator: "\n            ")
 
     let caseEnum: DeclSyntax = """
-        /// The enumerable case discriminant (without associated values).
-        ///
-        /// Use this for iteration over all case kinds:
-        /// ```swift
-        /// for c in \(raw: enumName).Case.allCases {
-        ///     print(c)
-        /// }
-        /// ```
         public enum Case: Finite_Primitives.Finite.Enumerable, Sendable {
             \(raw: caseCases)
 
@@ -119,9 +93,7 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
         """
     members.append(caseEnum)
 
-    // Generate `case` property
     let caseProperty: DeclSyntax = """
-        /// This value's case discriminant.
         @inlinable
         public var `case`: Case {
             switch self {
@@ -131,13 +103,11 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
         """
     members.append(caseProperty)
 
-    // Generate Prisms struct
     let prismProperties = cases.map { enumCase in
         generateEnumPrismProperty(for: enumCase, enumName: enumName)
     }.joined(separator: "\n\n        ")
 
     let prismsStruct: DeclSyntax = """
-        /// Prisms for each enum case, enabling type-safe case matching and extraction.
         public struct Prisms: Sendable {
             @inlinable
             public init() {}
@@ -147,20 +117,13 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
         """
     members.append(prismsStruct)
 
-    // Generate prisms static property
     let prismsProperty: DeclSyntax = """
-        /// Access prisms for each enum case.
         @inlinable
         public static var prisms: Prisms { Prisms() }
         """
     members.append(prismsProperty)
 
-    // Generate is(_:) method
     let isMethod: DeclSyntax = """
-        /// Checks if this value matches the given prism.
-        ///
-        /// - Parameter keyPath: A key path to a prism in `Prisms`.
-        /// - Returns: `true` if this value matches the prism's case.
         @inlinable
         public func `is`<Value>(_ keyPath: KeyPath<Prisms, Optic_Primitives.Optic.Prism<\(raw: enumName), Value>>) -> Bool {
             Self.prisms[keyPath: keyPath].extract(self) != nil
@@ -168,12 +131,7 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
         """
     members.append(isMethod)
 
-    // Generate subscript[prism:]
     let prismSubscript: DeclSyntax = """
-        /// Extracts the associated value for the given prism, if this value matches.
-        ///
-        /// - Parameter keyPath: A key path to a prism in `Prisms`.
-        /// - Returns: The extracted value, or `nil` if this value doesn't match.
         @inlinable
         public subscript<Value>(prism keyPath: KeyPath<Prisms, Optic_Primitives.Optic.Prism<\(raw: enumName), Value>>) -> Value? {
             Self.prisms[keyPath: keyPath].extract(self)
@@ -181,13 +139,7 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
         """
     members.append(prismSubscript)
 
-    // Generate mutating modify method
     let modifyMethod: DeclSyntax = """
-        /// Modifies the associated value in place if this value matches the given prism.
-        ///
-        /// - Parameters:
-        ///   - keyPath: A key path to a prism in `Prisms`.
-        ///   - transform: A closure that modifies the extracted value.
         @inlinable
         public mutating func modify<Value>(_ keyPath: KeyPath<Prisms, Optic_Primitives.Optic.Prism<\(raw: enumName), Value>>, _ transform: (inout Value) -> Void) {
             let prism = Self.prisms[keyPath: keyPath]
@@ -201,11 +153,9 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
     return members
 }
 
-/// Generates a direct computed property for extracting an enum case's associated value.
 private func generateEnumComputedProperty(for enumCase: EnumCase) -> DeclSyntax {
     if enumCase.parameters.isEmpty {
         return """
-            /// Extracts `Void` if this is the `\(raw: enumCase.name)` case, otherwise `nil`.
             @inlinable
             public var \(raw: enumCase.name): Void? {
                 if case .\(raw: enumCase.name) = self { () } else { nil }
@@ -217,7 +167,6 @@ private func generateEnumComputedProperty(for enumCase: EnumCase) -> DeclSyntax 
         let extractPattern = param.label.map { "\($0): let v" } ?? "let v"
 
         return """
-            /// Extracts the associated value if this is the `\(raw: enumCase.name)` case, otherwise `nil`.
             @inlinable
             public var \(raw: enumCase.name): \(raw: paramType)? {
                 if case .\(raw: enumCase.name)(\(raw: extractPattern)) = self { v } else { nil }
@@ -251,7 +200,6 @@ private func generateEnumComputedProperty(for enumCase: EnumCase) -> DeclSyntax 
         }.joined(separator: ", ")
 
         return """
-            /// Extracts the associated values if this is the `\(raw: enumCase.name)` case, otherwise `nil`.
             @inlinable
             public var \(raw: enumCase.name): (\(raw: tupleTypes))? {
                 if case .\(raw: enumCase.name)(\(raw: extractPatterns)) = self { (\(raw: extractTuple)) } else { nil }
@@ -274,16 +222,12 @@ private func generateEnumPrismProperty(for enumCase: EnumCase, enumName: String)
     return generatePrism(for: prismCase)
 }
 
-// MARK: - Shared Prism Generation
-
-/// Common representation for a prism case, used by both Calls (struct) and enum prism generation.
 struct PrismCase {
     let caseName: String
     let rootTypeName: String
     let parameters: [(label: String?, type: String)]
 }
 
-/// Generates a single prism property for a case.
 func generatePrism(for prismCase: PrismCase) -> String {
     let name = prismCase.caseName
     let root = prismCase.rootTypeName
@@ -339,9 +283,6 @@ func generatePrism(for prismCase: PrismCase) -> String {
     }
 }
 
-// MARK: - Identifier Escaping
-
-/// Escapes an identifier with backticks if it's a Swift keyword.
 func escapeIdentifier(_ identifier: String) -> String {
     let isKeyword = Array(identifier.utf8).withUnsafeBufferPointer { buffer in
         let text = SyntaxText(baseAddress: buffer.baseAddress, count: buffer.count)

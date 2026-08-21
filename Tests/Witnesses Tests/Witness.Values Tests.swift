@@ -1,15 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-foundations open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-foundations
-// project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Testing
 
 @testable import Witnesses
@@ -24,19 +12,15 @@ extension Witness.Values {
     }
 }
 
-// MARK: - Unit Tests
-
 extension Witness.Values.Test.Unit {
     @Test
     func `Values container stores and retrieves witnesses`() async throws {
         var values = Witness.Values()
 
-        // Before setting, returns liveValue
         let initial = values[TestAPI.self]
         let initialResult = try await initial.fetch(id: 1)
         #expect(initialResult == "Live result for 1")
 
-        // After setting, returns custom value
         values[TestAPI.self] = TestAPI(
             fetch: { id in "Custom result for \(id)" },
             update: { _, _ in }
@@ -49,7 +33,7 @@ extension Witness.Values.Test.Unit {
 
     @Test
     func `Test mode returns testValue by default`() async throws {
-        // Use Witness.Context with test mode to get testValue
+
         await Witness.Context.withTest {
             let api = Witness.Context[TestAPI.self]
             Task {
@@ -61,7 +45,7 @@ extension Witness.Values.Test.Unit {
 
     @Test
     func `Live mode returns liveValue by default`() async throws {
-        // Default mode is live
+
         let api = Witness.Context[TestAPI.self]
         let result = try await api.fetch(id: 1)
         #expect(result == "Live result for 1")
@@ -211,8 +195,6 @@ extension Witness.Values.Test.Unit {
     }
 }
 
-// MARK: - Edge Case Tests
-
 extension Witness.Values.Test.EdgeCase {
     @Test
     func `Overwriting a value replaces it`() async throws {
@@ -242,7 +224,6 @@ extension Witness.Values.Test.EdgeCase {
             update: { _, _ in }
         )
 
-        // TestAPI is customized
         let testApi = values[TestAPI.self]
         let testResult = try await testApi.fetch(id: 1)
         #expect(testResult == "Custom TestAPI")
@@ -282,12 +263,10 @@ extension Witness.Values.Test.EdgeCase {
 
         var values = Witness.Values(preparedStore: store)
 
-        // No explicit override — should fall through to prepared.
         values.withValue(for: HandleProvider.self, mode: .live) { value in
             #expect(value.id == 77)
         }
 
-        // Explicit override takes precedence.
         values.set(HandleProvider.self, UniqueHandle(id: 42))
         values.withValue(for: HandleProvider.self, mode: .live) { value in
             #expect(value.id == 42)
@@ -314,7 +293,6 @@ extension Witness.Values.Test.EdgeCase {
 
         let merged = a.merging(b)
 
-        // Both keys accessible after merge.
         merged.withValue(for: HandleProvider.self, mode: .live) { value in
             #expect(value.id == 10)
         }
@@ -339,17 +317,15 @@ extension Witness.Values.Test.EdgeCase {
     }
 }
 
-// MARK: - Performance Tests
-
 extension Witness.Values.Test.Performance {
     @Test
     func `Subscript access`() async throws {
         let values = Witness.Values()
-        // Warmup
+
         for _ in 0..<100 {
             _ = values[TestAPI.self]
         }
-        // Measured
+
         for _ in 0..<1000 {
             _ = values[TestAPI.self]
         }
@@ -362,11 +338,11 @@ extension Witness.Values.Test.Performance {
             fetch: { _ in "Test" },
             update: { _, _ in }
         )
-        // Warmup
+
         for _ in 0..<100 {
             values[TestAPI.self] = api
         }
-        // Measured
+
         for _ in 0..<1000 {
             values[TestAPI.self] = api
         }
@@ -376,11 +352,10 @@ extension Witness.Values.Test.Performance {
     func `withValue access`() {
         let values = Witness.Values()
 
-        // Warmup
         for _ in 0..<100 {
             values.withValue(for: HandleProvider.self, mode: .live) { _ in }
         }
-        // Measured
+
         for _ in 0..<1000 {
             values.withValue(for: HandleProvider.self, mode: .live) { _ in }
         }
@@ -390,11 +365,10 @@ extension Witness.Values.Test.Performance {
     func `set noncopyable value`() {
         var values = Witness.Values()
 
-        // Warmup
         for _ in 0..<100 {
             values.set(HandleProvider.self, UniqueHandle(id: 1))
         }
-        // Measured
+
         for _ in 0..<1000 {
             values.set(HandleProvider.self, UniqueHandle(id: 1))
         }
