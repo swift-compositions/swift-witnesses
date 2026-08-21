@@ -46,7 +46,7 @@ extension Witness {
         /// `DEPENDENCIES_STRICT=1` escalates the release-mode report to a
         /// trap, for smoke runs that want DEBUG-strength failure.
         private static let strict: Bool =
-            getenv("DEPENDENCIES_STRICT").map { String(cString: $0) == "1" } ?? false
+            unsafe getenv("DEPENDENCIES_STRICT").map { unsafe String(cString: $0) == "1" } ?? false
 
         /// Reports a test-only key's default being served in a live context.
         ///
