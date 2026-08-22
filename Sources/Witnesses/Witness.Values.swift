@@ -65,7 +65,7 @@ extension Witness.Values {
 
     @usableFromInline
     internal func value<K: Witness.Key>(for key: K.Type, mode: Witness.Context.Mode) -> K.Value
-    where K.Value: Copyable {
+    where K.Value: Copyable & Escapable {
         let id = ObjectIdentifier(K.self)
 
         if let ptr = unsafe _storage.dict[id] {
@@ -92,7 +92,7 @@ extension Witness.Values {
 
     @usableFromInline
     internal func value<K: Witness.Key.Test>(for key: K.Type, mode: Witness.Context.Mode) -> K.Value
-    where K.Value: Copyable {
+    where K.Value: Copyable & Escapable {
         let id = ObjectIdentifier(K.self)
 
         if let ptr = unsafe _storage.dict[id] {
@@ -124,7 +124,7 @@ extension Witness.Values {
         for key: K.Type,
         mode: Witness.Context.Mode,
         _ body: (borrowing K.Value) -> R
-    ) -> R {
+    ) -> R where K.Value: ~Copyable & Escapable {
         let id = ObjectIdentifier(K.self)
 
         if let ptr = unsafe _storage.dict[id] {
@@ -146,8 +146,22 @@ extension Witness.Values {
         }
     }
 
+    @usableFromInline
+    internal func withDefaultValue<K: Witness.Key, R>(
+        for key: K.Type,
+        mode: Witness.Context.Mode,
+        _ body: (borrowing K.Value) -> R
+    ) -> R where K.Value: ~Copyable & ~Escapable {
+        switch mode {
+        case .live: body(K.liveValue)
+        case .preview: body(K.previewValue)
+        case .test: body(K.testValue)
+        }
+    }
+
     @inlinable
-    public subscript<K: Witness.Key>(key: K.Type) -> K.Value where K.Value: Copyable {
+    public subscript<K: Witness.Key>(key: K.Type) -> K.Value
+    where K.Value: Copyable & Escapable {
         get {
             value(for: key, mode: .live)
         }
@@ -166,7 +180,8 @@ extension Witness.Values {
     }
 
     @inlinable
-    public subscript<K: Witness.Key.Test>(key: K.Type) -> K.Value where K.Value: Copyable {
+    public subscript<K: Witness.Key.Test>(key: K.Type) -> K.Value
+    where K.Value: Copyable & Escapable {
         get {
             value(for: key, mode: .test)
         }
@@ -185,7 +200,8 @@ extension Witness.Values {
     }
 
     @inlinable
-    public subscript<K: Dependency.Key>(key: K.Type) -> K.Value where K.Value: Copyable {
+    public subscript<K: Dependency.Key>(key: K.Type) -> K.Value
+    where K.Value: Copyable & Escapable {
         get {
             let id = ObjectIdentifier(K.self)
             if let ptr = unsafe _storage.dict[id] {
@@ -207,7 +223,8 @@ extension Witness.Values {
         }
     }
 
-    public mutating func set<K: Witness.Key>(_ key: K.Type, _ value: consuming K.Value) {
+    public mutating func set<K: Witness.Key>(_ key: K.Type, _ value: consuming K.Value)
+    where K.Value: ~Copyable & Escapable {
         _ensureUnique()
         let id = ObjectIdentifier(K.self)
 

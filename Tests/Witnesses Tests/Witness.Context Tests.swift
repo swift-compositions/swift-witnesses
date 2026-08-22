@@ -82,6 +82,23 @@ extension Witness.Context.Test.Unit {
     }
 
     @Test
+    func `Resolution stack accepts a noncopyable nonescapable witness value`() {
+        let result = Witness.Resolution.Stack.withPushed(
+            ScopedHandleProvider.self,
+            mode: .live
+        ) {
+            .success(Witness.Resolution.Stack.current)
+        }
+
+        switch result {
+        case .success(let stack):
+            #expect(stack.keys.count == 1)
+        case .failure(let error):
+            Issue.record("Expected a pushed resolution stack, got \(error)")
+        }
+    }
+
+    @Test
     func `Copyable Context subscript still works`() async throws {
         let api = Witness.Context[TestAPI.self]
         let result = try await api.fetch(id: 1)

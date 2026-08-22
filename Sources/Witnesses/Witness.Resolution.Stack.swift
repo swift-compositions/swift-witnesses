@@ -22,7 +22,7 @@ extension Witness.Resolution.Stack {
         _ key: K.Type,
         mode: Witness.Context.Mode,
         operation: () -> Result<T, Witness.Resolution.Error>
-    ) -> Result<T, Witness.Resolution.Error> {
+    ) -> Result<T, Witness.Resolution.Error> where K.Value: ~Copyable & ~Escapable {
         let id = ObjectIdentifier(key)
         var stack = current
 
@@ -44,6 +44,7 @@ extension Witness.Resolution.Stack {
             mode: Witness.Context.Mode,
             operation: nonisolated(nonsending) () async -> Result<T, Witness.Resolution.Error>
         ) async -> Result<T, Witness.Resolution.Error>
+        where K.Value: ~Copyable & ~Escapable
     {
         let id = ObjectIdentifier(key)
         var stack = current

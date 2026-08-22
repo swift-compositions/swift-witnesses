@@ -59,6 +59,21 @@ extension TokenProvider {
     static var previewValue: UniqueHandle { UniqueHandle(id: 5000) }
 }
 
+struct ScopedHandle: ~Copyable, ~Escapable, Sendable {
+    let id: Int
+}
+
+struct ScopedHandleProvider: Witness.Key, Sendable {
+}
+
+extension ScopedHandleProvider {
+    typealias Value = ScopedHandle
+
+    static var liveValue: ScopedHandle { fatalError("A nonescapable value requires a scope") }
+    static var testValue: ScopedHandle { fatalError("A nonescapable value requires a scope") }
+    static var previewValue: ScopedHandle { fatalError("A nonescapable value requires a scope") }
+}
+
 @Witness
 struct DriverPatternAPI: Sendable {
     let capabilities: Int

@@ -50,29 +50,39 @@ extension Witness.Context {
 
 extension Witness.Context {
 
-    public static subscript<K: Witness.Key>(key: K.Type) -> K.Value where K.Value: Copyable {
+    public static subscript<K: Witness.Key>(key: K.Type) -> K.Value
+    where K.Value: Copyable & Escapable {
         _current.values.value(for: key, mode: _current.mode)
     }
 
-    public static subscript<K: Witness.Key.Test>(key: K.Type) -> K.Value where K.Value: Copyable {
+    public static subscript<K: Witness.Key.Test>(key: K.Type) -> K.Value
+    where K.Value: Copyable & Escapable {
         _current.values.value(for: key, mode: _current.mode)
     }
 
-    public static subscript<K: Dependency.Key>(key: K.Type) -> K.Value where K.Value: Copyable {
+    public static subscript<K: Dependency.Key>(key: K.Type) -> K.Value
+    where K.Value: Copyable & Escapable {
         _current.values[K.self]
     }
 
     public static func value<K: Witness.Key>(
         _ key: K.Type
-    ) -> Result<K.Value, Witness.Resolution.Error> where K.Value: Copyable {
+    ) -> Result<K.Value, Witness.Resolution.Error> where K.Value: Copyable & Escapable {
         .success(_current.values.value(for: key, mode: _current.mode))
     }
 
     public static func withValue<K: Witness.Key, R>(
         _ key: K.Type,
         _ body: (borrowing K.Value) -> R
-    ) -> R {
+    ) -> R where K.Value: ~Copyable & Escapable {
         _current.values.withValue(for: key, mode: _current.mode, body)
+    }
+
+    public static func withValue<K: Witness.Key, R>(
+        _ key: K.Type,
+        _ body: (borrowing K.Value) -> R
+    ) -> R where K.Value: ~Copyable & ~Escapable {
+        _current.values.withDefaultValue(for: key, mode: _current.mode, body)
     }
 }
 

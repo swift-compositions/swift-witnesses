@@ -23,7 +23,8 @@ extension Witness {
         private static let strict: Bool =
             unsafe getenv("DEPENDENCIES_STRICT").map { unsafe String(cString: $0) == "1" } ?? false
 
-        static func testDefaultServedInLive<K: Witness.Key.Test>(_ key: K.Type) {
+        static func testDefaultServedInLive<K: Witness.Key.Test>(_ key: K.Type)
+        where K.Value: Copyable & Escapable {
             let message = """
                 [swift-witnesses] Test default served in LIVE context: key '\(K.self)' \
                 (value: \(K.Value.self)) has no liveValue (Witness.Key.Test-only) and was \

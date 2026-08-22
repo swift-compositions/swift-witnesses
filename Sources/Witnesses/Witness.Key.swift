@@ -3,14 +3,14 @@ import Witness_Primitives
 
 public protocol __WitnessKeyTest<Value>: Sendable {
 
-    associatedtype Value: ~Copyable & Sendable = Self
+    associatedtype Value: ~Copyable & ~Escapable & Sendable = Self
 
     static var testValue: Value { get }
 
     static var previewValue: Value { get }
 }
 
-extension __WitnessKeyTest where Value: Copyable {
+extension __WitnessKeyTest where Value: Copyable & Escapable {
 
     @inlinable
     public static var previewValue: Value { testValue }
@@ -18,13 +18,14 @@ extension __WitnessKeyTest where Value: Copyable {
 
 extension Witness {
 
-    public protocol Key<Value>: Dependency.Key, __WitnessKeyTest {
+    public protocol Key<Value>: Dependency.Key, __WitnessKeyTest
+    where Value: ~Copyable & ~Escapable {
 
         static var liveValue: Value { get }
     }
 }
 
-extension Witness.Key where Value: Copyable {
+extension Witness.Key where Value: Copyable & Escapable {
 
     @inlinable
     public static var previewValue: Value { liveValue }
@@ -33,7 +34,7 @@ extension Witness.Key where Value: Copyable {
     public static var testValue: Value { previewValue }
 }
 
-extension Witness.Key {
+extension Witness.Key where Value: ~Copyable & ~Escapable {
 
     public typealias Test = __WitnessKeyTest
 }

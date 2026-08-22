@@ -26,7 +26,8 @@ extension Witness.Preparation {
 
 extension Witness.Preparation.Store {
 
-    public func get<K: Witness.Key.Test>(_ key: K.Type) -> K.Value? where K.Value: Copyable {
+    public func get<K: Witness.Key.Test>(_ key: K.Type) -> K.Value?
+    where K.Value: Copyable & Escapable {
         lock.withLock { _ in
             let id = ObjectIdentifier(K.self)
             guard let ptr = unsafe storage[id] else {
@@ -41,7 +42,7 @@ extension Witness.Preparation.Store {
     public func withValue<K: Witness.Key.Test, R>(
         _ key: K.Type,
         _ body: (borrowing K.Value) -> R
-    ) -> R? {
+    ) -> R? where K.Value: ~Copyable & Escapable {
         lock.withLock { _ in
             let id = ObjectIdentifier(K.self)
             guard let ptr = unsafe storage[id] else { return nil }
@@ -53,7 +54,8 @@ extension Witness.Preparation.Store {
         }
     }
 
-    public func set<K: Witness.Key.Test>(_ key: K.Type, value: consuming K.Value) {
+    public func set<K: Witness.Key.Test>(_ key: K.Type, value: consuming K.Value)
+    where K.Value: ~Copyable & Escapable {
 
         let ptr = unsafe UnsafeRawPointer(
             Unmanaged.passRetained(Ownership.Immutable(value)).toOpaque()
@@ -70,7 +72,8 @@ extension Witness.Preparation.Store {
     }
 
     @discardableResult
-    public func remove<K: Witness.Key.Test>(_ key: K.Type) -> K.Value? where K.Value: Copyable {
+    public func remove<K: Witness.Key.Test>(_ key: K.Type) -> K.Value?
+    where K.Value: Copyable & Escapable {
         lock.withLock { _ in
             let id = ObjectIdentifier(K.self)
             guard let ptr = unsafe storage.removeValue(forKey: id) else {

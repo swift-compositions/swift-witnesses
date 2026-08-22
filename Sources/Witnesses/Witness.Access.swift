@@ -3,7 +3,8 @@ import Witness_Primitives
 extension Witness {
 
     @propertyWrapper
-    public struct Access<Key: Witness.Key>: Sendable where Key.Value == Key, Key.Value: Copyable {
+    public struct Access<Key: Witness.Key>: Sendable
+    where Key.Value == Key, Key.Value: Copyable & Escapable {
         @usableFromInline
         internal let initialValues: Witness.Values
 
