@@ -1,5 +1,5 @@
 import Synchronization
-import Witness_Primitives
+import Witness
 
 #if canImport(Darwin)
     import Darwin

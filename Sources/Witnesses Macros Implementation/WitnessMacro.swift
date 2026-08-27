@@ -268,14 +268,14 @@ extension WitnessMacro: ExtensionMacro {
 
         if !alreadyConformsToWitnessProtocol {
             let witnessExt = try ExtensionDeclSyntax(
-                "extension \(type.trimmed): Witness_Primitives.__WitnessProtocol {}"
+                "extension \(type.trimmed): Witness.__WitnessProtocol {}"
             )
             extensions.append(witnessExt)
         }
 
         if declaration.is(EnumDeclSyntax.self) {
             let prismExt = try ExtensionDeclSyntax(
-                "extension \(type.trimmed): Optic_Primitives.__OpticPrismAccessible {}"
+                "extension \(type.trimmed): Optic.__OpticPrismAccessible {}"
             )
             extensions.append(prismExt)
         }
@@ -876,12 +876,12 @@ private func generateCallsMembers(
             public static var prisms: Prisms { Prisms() }
 
             @inlinable
-            public func `is`<Value>(_ keyPath: KeyPath<Prisms, Optic_Primitives.Optic.Prism<Calls, Value>>) -> Bool {
+            public func `is`<Value>(_ keyPath: KeyPath<Prisms, Optic.Optic.Prism<Calls, Value>>) -> Bool {
                 Self.prisms[keyPath: keyPath].extract(self) != nil
             }
 
             @inlinable
-            public subscript<Value>(prism keyPath: KeyPath<Prisms, Optic_Primitives.Optic.Prism<Calls, Value>>) -> Value? {
+            public subscript<Value>(prism keyPath: KeyPath<Prisms, Optic.Optic.Prism<Calls, Value>>) -> Value? {
                 Self.prisms[keyPath: keyPath].extract(self)
             }
         }
@@ -938,7 +938,7 @@ private func generateCaseEnum(for properties: [ClosureProperty]) -> String {
         separator: "\n                "
     )
     let ordinalCases = properties.enumerated().map { i, p in
-        "case .\(caseEnumCaseName(for: p.methodName)): Ordinal_Primitives.Ordinal(\(i))"
+        "case .\(caseEnumCaseName(for: p.methodName)): Ordinal.Ordinal(\(i))"
     }.joined(separator: "\n                    ")
 
     let initCases: String
@@ -954,21 +954,21 @@ private func generateCaseEnum(for properties: [ClosureProperty]) -> String {
     }
 
     return """
-        public enum Case: Finite_Primitives.Finite.Enumerable, Sendable {
+        public enum Case: Finite.Finite.Enumerable, Sendable {
                     \(caseCases)
 
                     @inlinable
-                    public static var count: Cardinal_Primitives.Cardinal { Cardinal_Primitives.Cardinal(\(caseCount)) }
+                    public static var count: Cardinal.Cardinal { Cardinal.Cardinal(\(caseCount)) }
 
                     @inlinable
-                    public var ordinal: Ordinal_Primitives.Ordinal {
+                    public var ordinal: Ordinal.Ordinal {
                         switch self {
                         \(ordinalCases)
                         }
                     }
 
                     @inlinable
-                    public init(_unchecked: Void, ordinal: Ordinal_Primitives.Ordinal) {
+                    public init(_unchecked: Void, ordinal: Ordinal.Ordinal) {
                         switch ordinal.rawValue {
                         \(initCases)
                         }

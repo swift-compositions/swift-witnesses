@@ -1,5 +1,5 @@
-public import Dependency_Primitives
-import Witness_Primitives
+public import Dependency
+import Witness
 
 public protocol __WitnessKeyTest<Value>: Sendable {
 

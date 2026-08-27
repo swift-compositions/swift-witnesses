@@ -1,5 +1,5 @@
-import Async_Lifecycle_Primitives
-import Either_Primitives
+import Async_Lifecycle
+import Either
 import Testing
 public import Witnesses
 

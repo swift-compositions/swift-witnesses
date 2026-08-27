@@ -53,7 +53,7 @@ let stubbed = try await withWitnesses { values in
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/swift-foundations/swift-witnesses.git", branch: "main")
+    .package(url: "https://github.com/swift-compositions/swift-witnesses.git", branch: "main")
 ]
 ```
 

@@ -29,35 +29,35 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "602.0.0"..<"603.0.0"),
         .package(
-            url: "https://github.com/swift-primitives/swift-witness-primitives.git",
+            url: "https://github.com/swift-molecules/swift-witness.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-primitives/swift-source-primitives.git",
+            url: "https://github.com/swift-molecules/swift-source.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-primitives/swift-optic-primitives.git",
+            url: "https://github.com/swift-molecules/swift-optic.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-primitives/swift-finite-primitives.git",
+            url: "https://github.com/swift-molecules/swift-finite.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-primitives/swift-ownership-primitives.git",
+            url: "https://github.com/swift-molecules/swift-ownership.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-primitives/swift-dependency-primitives.git",
+            url: "https://github.com/swift-molecules/swift-dependency.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-primitives/swift-either-primitives.git",
+            url: "https://github.com/swift-molecules/swift-either.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-primitives/swift-async-primitives.git",
+            url: "https://github.com/swift-molecules/swift-async.git",
             branch: "main"
         ),
     ],
@@ -66,21 +66,21 @@ let package = Package(
             name: "Witnesses",
             dependencies: [
                 "Witnesses Macros",
-                .product(name: "Witness Primitives", package: "swift-witness-primitives"),
-                .product(name: "Source Primitives", package: "swift-source-primitives"),
-                .product(name: "Ownership Primitives", package: "swift-ownership-primitives"),
-                .product(name: "Dependency Primitives", package: "swift-dependency-primitives"),
-                .product(name: "Either Primitives", package: "swift-either-primitives"),
-                .product(name: "Async Lifecycle Primitives", package: "swift-async-primitives"),
+                .product(name: "Witness", package: "swift-witness"),
+                .product(name: "Source", package: "swift-source"),
+                .product(name: "Ownership", package: "swift-ownership"),
+                .product(name: "Dependency", package: "swift-dependency"),
+                .product(name: "Either", package: "swift-either"),
+                .product(name: "Async Lifecycle", package: "swift-async"),
             ]
         ),
         .target(
             name: "Witnesses Macros",
             dependencies: [
                 "Witnesses Macros Implementation",
-                .product(name: "Witness Primitives", package: "swift-witness-primitives"),
-                .product(name: "Optic Primitives", package: "swift-optic-primitives"),
-                .product(name: "Finite Primitives", package: "swift-finite-primitives"),
+                .product(name: "Witness", package: "swift-witness"),
+                .product(name: "Optic", package: "swift-optic"),
+                .product(name: "Finite", package: "swift-finite"),
             ]
         ),
         .macro(
@@ -103,8 +103,8 @@ let package = Package(
             name: "Witnesses Tests",
             dependencies: [
                 "Witnesses",
-                .product(name: "Either Primitives", package: "swift-either-primitives"),
-                .product(name: "Async Lifecycle Primitives", package: "swift-async-primitives"),
+                .product(name: "Either", package: "swift-either"),
+                .product(name: "Async Lifecycle", package: "swift-async"),
             ],
             swiftSettings: [
 

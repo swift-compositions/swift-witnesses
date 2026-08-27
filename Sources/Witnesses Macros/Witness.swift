@@ -1,6 +1,6 @@
-@_exported public import Finite_Primitives
-@_exported public import Optic_Primitives
-@_exported public import Witness_Primitives
+@_exported public import Finite
+@_exported public import Optic
+@_exported public import Witness
 
 extension Witness {
 
@@ -25,8 +25,8 @@ extension Witness.Derive {
 @attached(memberAttribute)
 @attached(
     extension,
-    conformances: Witness_Primitives.__WitnessProtocol,
-    Optic_Primitives.__OpticPrismAccessible,
+    conformances: Witness.__WitnessProtocol,
+    Optic.__OpticPrismAccessible,
     names: named(unimplemented),
     named(mock)
 )
@@ -40,8 +40,8 @@ public macro Witness() =
 @attached(memberAttribute)
 @attached(
     extension,
-    conformances: Witness_Primitives.__WitnessProtocol,
-    Optic_Primitives.__OpticPrismAccessible,
+    conformances: Witness.__WitnessProtocol,
+    Optic.__OpticPrismAccessible,
     names: named(unimplemented),
     named(mock)
 )

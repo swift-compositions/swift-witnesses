@@ -1,6 +1,6 @@
-public import Dependency_Primitives
-public import Ownership_Primitives
-import Witness_Primitives
+public import Dependency
+public import Ownership
+import Witness
 
 extension Witness {
 

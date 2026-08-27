@@ -1,4 +1,4 @@
-import Witness_Primitives
+import Witness
 
 @inlinable
 public func withWitnesses<T, E: Swift.Error>(

@@ -1,5 +1,5 @@
-public import Dependency_Primitives
-import Witness_Primitives
+public import Dependency
+import Witness
 
 extension Witness {
 
@@ -91,7 +91,7 @@ extension Witness.Context {
     @inlinable
     public static func _withScope<T, E: Swift.Error>(
         mode: Mode? = nil,
-        _ modify: (inout Witness.Values, inout Dependency_Primitives.Dependency.Values) -> Void,
+        _ modify: (inout Witness.Values, inout Dependency.Dependency.Values) -> Void,
         operation: () throws(E) -> T
     ) throws(E) -> T {
         try Dependency.Scope.with(
@@ -112,7 +112,7 @@ extension Witness.Context {
     nonisolated(nonsending)
         public static func _withScope<T, E: Swift.Error>(
             mode: Mode? = nil,
-            _ modify: (inout Witness.Values, inout Dependency_Primitives.Dependency.Values) -> Void,
+            _ modify: (inout Witness.Values, inout Dependency.Dependency.Values) -> Void,
             operation: nonisolated(nonsending) () async throws(E) -> T
         ) async throws(E) -> T
     {

@@ -1,5 +1,5 @@
 public import Synchronization
-import Witness_Primitives
+import Witness
 
 extension Witness {
 

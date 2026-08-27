@@ -55,7 +55,7 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
     let escapedCaseNames = cases.map { escapeIdentifier($0.name) }
     let caseCases = escapedCaseNames.map { "case \($0)" }.joined(separator: "\n            ")
     let caseOrdinalCases = cases.enumerated().map { index, c in
-        "case .\(escapeIdentifier(c.name)): Ordinal_Primitives.Ordinal(\(index))"
+        "case .\(escapeIdentifier(c.name)): Ordinal.Ordinal(\(index))"
     }.joined(separator: "\n                ")
     let uncheckedInitCases = cases.enumerated().map { index, c in
         if index == cases.count - 1 {
@@ -70,21 +70,21 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
     }.joined(separator: "\n            ")
 
     let caseEnum: DeclSyntax = """
-        public enum Case: Finite_Primitives.Finite.Enumerable, Sendable {
+        public enum Case: Finite.Finite.Enumerable, Sendable {
             \(raw: caseCases)
 
             @inlinable
-            public static var count: Cardinal_Primitives.Cardinal { Cardinal_Primitives.Cardinal(\(raw: caseCount)) }
+            public static var count: Cardinal.Cardinal { Cardinal.Cardinal(\(raw: caseCount)) }
 
             @inlinable
-            public var ordinal: Ordinal_Primitives.Ordinal {
+            public var ordinal: Ordinal.Ordinal {
                 switch self {
                 \(raw: caseOrdinalCases)
                 }
             }
 
             @inlinable
-            public init(_unchecked: Void, ordinal: Ordinal_Primitives.Ordinal) {
+            public init(_unchecked: Void, ordinal: Ordinal.Ordinal) {
                 switch ordinal.rawValue {
                 \(raw: uncheckedInitCases)
                 }
@@ -125,7 +125,7 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
 
     let isMethod: DeclSyntax = """
         @inlinable
-        public func `is`<Value>(_ keyPath: KeyPath<Prisms, Optic_Primitives.Optic.Prism<\(raw: enumName), Value>>) -> Bool {
+        public func `is`<Value>(_ keyPath: KeyPath<Prisms, Optic.Optic.Prism<\(raw: enumName), Value>>) -> Bool {
             Self.prisms[keyPath: keyPath].extract(self) != nil
         }
         """
@@ -133,7 +133,7 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
 
     let prismSubscript: DeclSyntax = """
         @inlinable
-        public subscript<Value>(prism keyPath: KeyPath<Prisms, Optic_Primitives.Optic.Prism<\(raw: enumName), Value>>) -> Value? {
+        public subscript<Value>(prism keyPath: KeyPath<Prisms, Optic.Optic.Prism<\(raw: enumName), Value>>) -> Value? {
             Self.prisms[keyPath: keyPath].extract(self)
         }
         """
@@ -141,7 +141,7 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
 
     let modifyMethod: DeclSyntax = """
         @inlinable
-        public mutating func modify<Value>(_ keyPath: KeyPath<Prisms, Optic_Primitives.Optic.Prism<\(raw: enumName), Value>>, _ transform: (inout Value) -> Void) {
+        public mutating func modify<Value>(_ keyPath: KeyPath<Prisms, Optic.Optic.Prism<\(raw: enumName), Value>>, _ transform: (inout Value) -> Void) {
             let prism = Self.prisms[keyPath: keyPath]
             guard var value = prism.extract(self) else { return }
             transform(&value)
@@ -234,8 +234,8 @@ func generatePrism(for prismCase: PrismCase) -> String {
 
     if prismCase.parameters.isEmpty {
         return """
-            public var \(name): Optic_Primitives.Optic.Prism<\(root), Void> {
-                        Optic_Primitives.Optic.Prism(
+            public var \(name): Optic.Optic.Prism<\(root), Void> {
+                        Optic.Optic.Prism(
                             embed: { _ in .\(name) },
                             extract: { if case .\(name) = $0 { return () } else { return nil } }
                         )
@@ -248,8 +248,8 @@ func generatePrism(for prismCase: PrismCase) -> String {
         let extractPattern = param.label != nil ? "\(param.label!): let v" : "let v"
 
         return """
-            public var \(name): Optic_Primitives.Optic.Prism<\(root), \(paramType)> {
-                        Optic_Primitives.Optic.Prism(
+            public var \(name): Optic.Optic.Prism<\(root), \(paramType)> {
+                        Optic.Optic.Prism(
                             embed: { .\(name)(\(embedArg)) },
                             extract: { if case .\(name)(\(extractPattern)) = $0 { return v } else { return nil } }
                         )
@@ -273,8 +273,8 @@ func generatePrism(for prismCase: PrismCase) -> String {
         }.joined(separator: ", ")
 
         return """
-            public var \(name): Optic_Primitives.Optic.Prism<\(root), (\(tupleTypes))> {
-                        Optic_Primitives.Optic.Prism(
+            public var \(name): Optic.Optic.Prism<\(root), (\(tupleTypes))> {
+                        Optic.Optic.Prism(
                             embed: { .\(name)(\(embedArgs)) },
                             extract: { if case .\(name)(\(extractPatterns)) = $0 { return (\(extractTuple)) } else { return nil } }
                         )

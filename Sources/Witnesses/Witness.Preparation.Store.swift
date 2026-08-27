@@ -1,4 +1,4 @@
-internal import Ownership_Primitives
+internal import Ownership
 import Synchronization
 
 extension Witness.Preparation {
