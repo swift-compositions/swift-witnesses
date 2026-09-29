@@ -268,14 +268,14 @@ extension WitnessMacro: ExtensionMacro {
 
         if !alreadyConformsToWitnessProtocol {
             let witnessExt = try ExtensionDeclSyntax(
-                "extension \(type.trimmed): Witness.__WitnessProtocol {}"
+                "extension \(type.trimmed): Witness::__WitnessProtocol {}"
             )
             extensions.append(witnessExt)
         }
 
         if declaration.is(EnumDeclSyntax.self) {
             let prismExt = try ExtensionDeclSyntax(
-                "extension \(type.trimmed): Optic.__OpticPrismAccessible {}"
+                "extension \(type.trimmed): Optic::__OpticPrismAccessible {}"
             )
             extensions.append(prismExt)
         }
