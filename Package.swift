@@ -29,7 +29,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "603.0.2"..<"604.0.0"),
         .package(
-            url: "https://github.com/swift-molecules/swift-witness.git",
+            url: "https://github.com/swift-atoms/swift-witness.git",
             branch: "main"
         ),
         .package(
@@ -37,27 +37,27 @@ let package = Package(
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-molecules/swift-optic.git",
+            url: "https://github.com/swift-atoms/swift-optic.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-molecules/swift-finite.git",
+            url: "https://github.com/swift-atoms/swift-finite.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-molecules/swift-ownership.git",
+            url: "https://github.com/swift-atoms/swift-ownership.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-molecules/swift-dependency.git",
+            url: "https://github.com/swift-atoms/swift-dependency.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-molecules/swift-either.git",
+            url: "https://github.com/swift-atoms/swift-either.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-molecules/swift-async.git",
+            url: "https://github.com/swift-atoms/swift-async.git",
             branch: "main"
         ),
     ],
