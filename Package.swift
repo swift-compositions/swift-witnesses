@@ -42,7 +42,8 @@ let package = Package(
         ),
         .package(
             url: "https://github.com/swift-atoms/swift-finite.git",
-            branch: "main"
+            branch: "main",
+            traits: ["Tagged"]
         ),
         .package(
             url: "https://github.com/swift-atoms/swift-ownership.git",
