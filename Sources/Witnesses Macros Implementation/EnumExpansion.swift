@@ -125,7 +125,7 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
 
     let isMethod: DeclSyntax = """
         @inlinable
-        public func `is`<Value>(_ keyPath: KeyPath<Prisms, Optic::Optic.Prism<\(raw: enumName), Value>>) -> Bool {
+        public func `is`<Value>(_ keyPath: KeyPath<Prisms, Optic::Optic<\(raw: enumName), \(raw: enumName), Value, Value>.Prism>) -> Bool {
             Self.prisms[keyPath: keyPath].extract(self) != nil
         }
         """
@@ -133,7 +133,7 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
 
     let prismSubscript: DeclSyntax = """
         @inlinable
-        public subscript<Value>(prism keyPath: KeyPath<Prisms, Optic::Optic.Prism<\(raw: enumName), Value>>) -> Value? {
+        public subscript<Value>(prism keyPath: KeyPath<Prisms, Optic::Optic<\(raw: enumName), \(raw: enumName), Value, Value>.Prism>) -> Value? {
             Self.prisms[keyPath: keyPath].extract(self)
         }
         """
@@ -141,7 +141,7 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
 
     let modifyMethod: DeclSyntax = """
         @inlinable
-        public mutating func modify<Value>(_ keyPath: KeyPath<Prisms, Optic::Optic.Prism<\(raw: enumName), Value>>, _ transform: (inout Value) -> Void) {
+        public mutating func modify<Value>(_ keyPath: KeyPath<Prisms, Optic::Optic<\(raw: enumName), \(raw: enumName), Value, Value>.Prism>, _ transform: (inout Value) -> Void) {
             let prism = Self.prisms[keyPath: keyPath]
             guard var value = prism.extract(self) else { return }
             transform(&value)
@@ -234,10 +234,10 @@ func generatePrism(for prismCase: PrismCase) -> String {
 
     if prismCase.parameters.isEmpty {
         return """
-            public var \(name): Optic::Optic.Prism<\(root), Void> {
-                        Optic::Optic.Prism(
-                            embed: { _ in .\(name) },
-                            extract: { if case .\(name) = $0 { return () } else { return nil } }
+            public var \(name): Optic::Optic<\(root), \(root), Void, Void>.Prism {
+                        .init(
+                            match: { whole in if case .\(name) = whole { return .right(()) } else { return .left(whole) } },
+                            embed: { _ in .\(name) }
                         )
                     }
             """
@@ -248,10 +248,10 @@ func generatePrism(for prismCase: PrismCase) -> String {
         let extractPattern = param.label != nil ? "\(param.label!): let v" : "let v"
 
         return """
-            public var \(name): Optic::Optic.Prism<\(root), \(paramType)> {
-                        Optic::Optic.Prism(
-                            embed: { .\(name)(\(embedArg)) },
-                            extract: { if case .\(name)(\(extractPattern)) = $0 { return v } else { return nil } }
+            public var \(name): Optic::Optic<\(root), \(root), \(paramType), \(paramType)>.Prism {
+                        .init(
+                            match: { whole in if case .\(name)(\(extractPattern)) = whole { return .right(v) } else { return .left(whole) } },
+                            embed: { .\(name)(\(embedArg)) }
                         )
                     }
             """
@@ -273,10 +273,10 @@ func generatePrism(for prismCase: PrismCase) -> String {
         }.joined(separator: ", ")
 
         return """
-            public var \(name): Optic::Optic.Prism<\(root), (\(tupleTypes))> {
-                        Optic::Optic.Prism(
-                            embed: { .\(name)(\(embedArgs)) },
-                            extract: { if case .\(name)(\(extractPatterns)) = $0 { return (\(extractTuple)) } else { return nil } }
+            public var \(name): Optic::Optic<\(root), \(root), (\(tupleTypes)), (\(tupleTypes))>.Prism {
+                        .init(
+                            match: { whole in if case .\(name)(\(extractPatterns)) = whole { return .right((\(extractTuple))) } else { return .left(whole) } },
+                            embed: { .\(name)(\(embedArgs)) }
                         )
                     }
             """

@@ -1,4 +1,5 @@
 @_exported public import Finite
+@_exported public import Either
 @_exported public import Optic
 @_exported public import Witness
 

@@ -876,12 +876,12 @@ private func generateCallsMembers(
             public static var prisms: Prisms { Prisms() }
 
             @inlinable
-            public func `is`<Value>(_ keyPath: KeyPath<Prisms, Optic::Optic.Prism<Calls, Value>>) -> Bool {
+            public func `is`<Value>(_ keyPath: KeyPath<Prisms, Optic::Optic<Calls, Calls, Value, Value>.Prism>) -> Bool {
                 Self.prisms[keyPath: keyPath].extract(self) != nil
             }
 
             @inlinable
-            public subscript<Value>(prism keyPath: KeyPath<Prisms, Optic::Optic.Prism<Calls, Value>>) -> Value? {
+            public subscript<Value>(prism keyPath: KeyPath<Prisms, Optic::Optic<Calls, Calls, Value, Value>.Prism>) -> Value? {
                 Self.prisms[keyPath: keyPath].extract(self)
             }
         }

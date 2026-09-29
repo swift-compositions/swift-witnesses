@@ -80,6 +80,7 @@ let package = Package(
             name: "Witnesses Macros",
             dependencies: [
                 "Witnesses Macros Implementation",
+                .product(name: "Either", package: "swift-either"),
                 .product(name: "Witness", package: "swift-witness"),
                 .product(name: "Optic", package: "swift-optic"),
                 .product(name: "Finite", package: "swift-finite"),
