@@ -91,7 +91,7 @@ extension Witness.Test.Enum.Unit {
     @Test
     func `Modify via prism`() {
         var action = TestCalls.save(path: "/old")
-        TestCalls.prisms.save.modify(&action) { _ in "/new" }
+        action.modify(\.save) { $0 = "/new" }
         #expect(action.save == "/new")
     }
 
