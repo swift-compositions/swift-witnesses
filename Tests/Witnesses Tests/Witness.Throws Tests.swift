@@ -9,7 +9,7 @@ extension Witness.Test.Unit {
         let error: any Swift.Error = CustomError.failed
 
         let syncResult = ThrowsMatrixAPI.Result.bareSync(
-            Standard_Library_Extensions.Result<Int, any Swift.Error>.failure(error)
+            Swift.Result<Int, any Swift.Error>.failure(error)
         )
         switch consume syncResult {
         case .bareSync(.failure(let captured)):
@@ -20,7 +20,7 @@ extension Witness.Test.Unit {
         }
 
         let asyncResult = ThrowsMatrixAPI.Result.bareAsync(
-            Standard_Library_Extensions.Result<String, any Swift.Error>.failure(error)
+            Swift.Result<String, any Swift.Error>.failure(error)
         )
         switch consume asyncResult {
         case .bareAsync(.failure(let captured)):
@@ -35,7 +35,7 @@ extension Witness.Test.Unit {
     func `Typed throws derives the concrete failure type`() throws {
 
         let syncResult = ThrowsMatrixAPI.Result.typedSync(
-            Standard_Library_Extensions.Result<Int, CustomError>.failure(.failed)
+            Swift.Result<Int, CustomError>.failure(.failed)
         )
         switch consume syncResult {
         case .typedSync(.failure(let captured)):
@@ -46,7 +46,7 @@ extension Witness.Test.Unit {
         }
 
         let asyncResult = ThrowsMatrixAPI.Result.typedAsync(
-            Standard_Library_Extensions.Result<String, CustomError>.failure(.failed)
+            Swift.Result<String, CustomError>.failure(.failed)
         )
         switch consume asyncResult {
         case .typedAsync(.failure(let captured)):
@@ -61,7 +61,7 @@ extension Witness.Test.Unit {
     func `Non-throwing derives Never failure type`() throws {
 
         let result = ThrowsMatrixAPI.Result.nonThrowing(
-            Standard_Library_Extensions.Result<Int, Never>.success(42)
+            Swift.Result<Int, Never>.success(42)
         )
         switch consume result {
         case .nonThrowing(.success(let value)):

@@ -130,7 +130,7 @@ extension Witness.Unimplemented.Test.Unit {
     func `Noncopyable driver Result carries actual return types`() throws {
         let handle = NoncopyableHandle(fd: 42)
         let result = NoncopyableDriverAPI.Result.create(
-            Standard_Library_Extensions.Result<NoncopyableHandle, Witness.Unimplemented.Error>
+            Swift.Result<NoncopyableHandle, Witness.Unimplemented.Error>
                 .success(handle)
         )
         switch consume result {

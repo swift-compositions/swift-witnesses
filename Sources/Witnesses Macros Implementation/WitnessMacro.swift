@@ -1007,7 +1007,7 @@ private func generateTypedResultCase(for property: ClosureProperty) -> String {
     let returnType = property.returnType.trimmedDescription
     let errorType = property.derivedFailureType
     return
-        "case \(property.methodName)(Standard_Library_Extensions.Result<\(returnType), \(errorType)>)"
+        "case \(property.methodName)(Swift.Result<\(returnType), \(errorType)>)"
 }
 
 private func generatePrismProperties(for properties: [ClosureProperty]) -> String {
@@ -1316,7 +1316,7 @@ private func generateObserveBody(
     let returnType = property.returnType.trimmedDescription
     let hasReturn = !property.returnsVoid
     let errorType = property.derivedFailureType
-    let witnessResultType = "Standard_Library_Extensions.Result<\(returnType), \(errorType)>"
+    let witnessResultType = "Swift.Result<\(returnType), \(errorType)>"
 
     let beforeCall: String
     let afterCall: String
