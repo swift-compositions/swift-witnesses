@@ -25,8 +25,8 @@ extension Witness.Derive {
 @attached(memberAttribute)
 @attached(
     extension,
-    conformances: Witness.__WitnessProtocol,
-    Optic.__OpticPrismAccessible,
+    conformances: Witness::__WitnessProtocol,
+    Optic::__OpticPrismAccessible,
     names: named(unimplemented),
     named(mock)
 )
@@ -40,8 +40,8 @@ public macro Witness() =
 @attached(memberAttribute)
 @attached(
     extension,
-    conformances: Witness.__WitnessProtocol,
-    Optic.__OpticPrismAccessible,
+    conformances: Witness::__WitnessProtocol,
+    Optic::__OpticPrismAccessible,
     names: named(unimplemented),
     named(mock)
 )
