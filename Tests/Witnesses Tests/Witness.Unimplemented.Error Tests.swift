@@ -1,3 +1,4 @@
+import Text
 import Testing
 
 @testable import Witnesses
