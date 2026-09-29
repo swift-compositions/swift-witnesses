@@ -76,16 +76,16 @@ extension Witness.Test.Enum.Unit {
 
     @Test
     func `is prism check`() {
-        #expect(TestCalls.load.is(\.load) == true)
-        #expect(TestCalls.save(path: "x").is(\.load) == false)
-        #expect(TestCalls.save(path: "x").is(\.save) == true)
+        #expect(TestCalls.prisms.load ~= TestCalls.load)
+        #expect(!(TestCalls.prisms.load ~= TestCalls.save(path: "x")))
+        #expect(TestCalls.prisms.save ~= TestCalls.save(path: "x"))
     }
 
     @Test
     func `Subscript prism extraction`() {
         let action = TestCalls.save(path: "/home")
-        #expect(action[prism: \.save] == "/home")
-        #expect(action[prism: \.load] == nil)
+        #expect(action[dynamicMember: \.save] == "/home")
+        #expect(action[dynamicMember: \.load] == nil)
     }
 
     @Test
