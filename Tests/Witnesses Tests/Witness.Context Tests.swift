@@ -202,7 +202,7 @@ extension Witness.Context.Test.Integration {
             let result1 = try await api1.fetch(id: 1)
             #expect(result1 == "Async context")
 
-            try await Task.sleep(for: .milliseconds(1))
+            await Task.yield()
 
             let api2 = Witness.Context.current[TestAPI.self]
             let result2 = try await api2.fetch(id: 2)
