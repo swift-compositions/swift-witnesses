@@ -41,3 +41,23 @@ extension Witness.Test.Unit {
         #expect(action.case == .fetch)
     }
 }
+
+enum VoidShadowingNamespace {
+    enum Void {}
+
+    @Witness
+    struct Client: Sendable {
+        var void: @Sendable () throws(Witness.Unimplemented.Error) -> Int
+        var other: @Sendable () throws(Witness.Unimplemented.Error) -> Int
+    }
+}
+
+extension Witness.Test.Unit {
+    @Test
+    func `Witness nested in a scope that declares its own Void expands and compiles`() {
+        let ordinal = VoidShadowingNamespace.Client.Calls.Case.void.ordinal
+        let roundTripped = VoidShadowingNamespace.Client.Calls.Case(_unchecked: (), ordinal: ordinal)
+        #expect(roundTripped == .void)
+        #expect(VoidShadowingNamespace.Client.Calls.Case.count.rawValue == 2)
+    }
+}

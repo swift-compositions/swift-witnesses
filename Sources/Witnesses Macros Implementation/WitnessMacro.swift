@@ -447,7 +447,7 @@ private func generateMockParameter(for property: ClosureProperty) -> String {
     let returnType = property.returnType.trimmedDescription
 
     if property.returnsVoid {
-        return "\(property.methodName): Void = ()"
+        return "\(property.methodName): Swift.Void = ()"
     } else {
         return "\(property.methodName): \(returnType)"
     }
@@ -968,7 +968,7 @@ private func generateCaseEnum(for properties: [ClosureProperty]) -> String {
                     }
 
                     @inlinable
-                    public init(_unchecked: Void, ordinal: Ordinal::Ordinal) {
+                    public init(_unchecked: Swift.Void, ordinal: Ordinal::Ordinal) {
                         switch ordinal.rawValue {
                         \(initCases)
                         }
@@ -1194,8 +1194,8 @@ private func generateObserveStruct(
             }
 
             \(raw: inlinableAttr)public func callAsFunction(
-                _ before: @escaping \(raw: isSendable ? "@Sendable " : "")(Calls) -> Void,
-                after: @escaping \(raw: isSendable ? "@Sendable " : "")(borrowing Outcome) -> Void
+                _ before: @escaping \(raw: isSendable ? "@Sendable " : "")(Calls) -> Swift.Void,
+                after: @escaping \(raw: isSendable ? "@Sendable " : "")(borrowing Outcome) -> Swift.Void
             ) -> _Witness {
                 _Witness(
                     \(raw: bothInitArgs)
@@ -1203,7 +1203,7 @@ private func generateObserveStruct(
             }
 
             \(raw: inlinableAttr)public func before(
-                _ observer: @escaping \(raw: isSendable ? "@Sendable " : "")(Calls) -> Void
+                _ observer: @escaping \(raw: isSendable ? "@Sendable " : "")(Calls) -> Swift.Void
             ) -> _Witness {
                 _Witness(
                     \(raw: beforeInitArgs)
@@ -1211,7 +1211,7 @@ private func generateObserveStruct(
             }
 
             \(raw: inlinableAttr)public func after(
-                _ observer: @escaping \(raw: isSendable ? "@Sendable " : "")(borrowing Outcome) -> Void
+                _ observer: @escaping \(raw: isSendable ? "@Sendable " : "")(borrowing Outcome) -> Swift.Void
             ) -> _Witness {
                 _Witness(
                     \(raw: afterInitArgs)

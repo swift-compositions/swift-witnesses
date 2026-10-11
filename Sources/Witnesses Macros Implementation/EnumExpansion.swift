@@ -84,7 +84,7 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
             }
 
             @inlinable
-            public init(_unchecked: Void, ordinal: Ordinal::Ordinal) {
+            public init(_unchecked: Swift.Void, ordinal: Ordinal::Ordinal) {
                 switch ordinal.rawValue {
                 \(raw: uncheckedInitCases)
                 }
@@ -141,7 +141,7 @@ func generateEnumPrismMembers(for cases: [EnumCase], enumName: String) -> [DeclS
 
     let modifyMethod: DeclSyntax = """
         @inlinable
-        public mutating func modify<Value>(_ keyPath: KeyPath<Prisms, Optic::Optic<\(raw: enumName), \(raw: enumName), Value, Value>.Prism>, _ transform: (inout Value) -> Void) {
+        public mutating func modify<Value>(_ keyPath: KeyPath<Prisms, Optic::Optic<\(raw: enumName), \(raw: enumName), Value, Value>.Prism>, _ transform: (inout Value) -> Swift.Void) {
             let prism = Self.prisms[keyPath: keyPath]
             guard var value = prism.extract(self) else { return }
             transform(&value)
@@ -157,7 +157,7 @@ private func generateEnumComputedProperty(for enumCase: EnumCase) -> DeclSyntax 
     if enumCase.parameters.isEmpty {
         return """
             @inlinable
-            public var \(raw: enumCase.name): Void? {
+            public var \(raw: enumCase.name): Swift.Void? {
                 if case .\(raw: enumCase.name) = self { () } else { nil }
             }
             """
@@ -234,7 +234,7 @@ func generatePrism(for prismCase: PrismCase) -> String {
 
     if prismCase.parameters.isEmpty {
         return """
-            public var \(name): Optic::Optic<\(root), \(root), Void, Void>.Prism {
+            public var \(name): Optic::Optic<\(root), \(root), Swift.Void, Swift.Void>.Prism {
                         .init(
                             match: { whole in if case .\(name) = whole { return .right(()) } else { return .left(whole) } },
                             embed: { _ in .\(name) }
