@@ -224,8 +224,8 @@ extension WitnessMacro: MemberAttributeMacro {
         guard let varDecl = member.as(VariableDeclSyntax.self),
             let binding = varDecl.bindings.first,
             binding.accessorBlock == nil,
-            let identifier = binding.pattern.as(IdentifierPatternSyntax.self),
-            let typeAnnotation = binding.typeAnnotation
+            binding.pattern.is(IdentifierPatternSyntax.self),
+            binding.typeAnnotation != nil
         else {
             return []
         }
