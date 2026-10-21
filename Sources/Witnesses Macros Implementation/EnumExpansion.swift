@@ -174,29 +174,26 @@ private func generateEnumComputedProperty(for enumCase: EnumCase) -> DeclSyntax 
             """
     } else {
         let tupleTypes = enumCase.parameters.map { param in
-            if let label = param.label {
-                let escaped = escapeIdentifier(label)
-                return "\(escaped): \(param.type)"
-            } else {
+            guard let label = param.label else {
                 return param.type
             }
+            let escaped = escapeIdentifier(label)
+            return "\(escaped): \(param.type)"
         }.joined(separator: ", ")
 
         let extractPatterns = enumCase.parameters.enumerated().map { index, param in
-            if let label = param.label {
-                return "\(label): let v\(index)"
-            } else {
+            guard let label = param.label else {
                 return "let v\(index)"
             }
+            return "\(label): let v\(index)"
         }.joined(separator: ", ")
 
         let extractTuple = enumCase.parameters.enumerated().map { index, param in
-            if let label = param.label {
-                let escaped = escapeIdentifier(label)
-                return "\(escaped): v\(index)"
-            } else {
+            guard let label = param.label else {
                 return "v\(index)"
             }
+            let escaped = escapeIdentifier(label)
+            return "\(escaped): v\(index)"
         }.joined(separator: ", ")
 
         return """
@@ -244,8 +241,8 @@ func generatePrism(for prismCase: PrismCase) -> String {
     } else if prismCase.parameters.count == 1 {
         let param = prismCase.parameters[0]
         let paramType = param.type
-        let embedArg = param.label != nil ? "\(param.label!): $0" : "$0"
-        let extractPattern = param.label != nil ? "\(param.label!): let v" : "let v"
+        let embedArg = param.label.map { label in "\(label): $0" } ?? "$0"
+        let extractPattern = param.label.map { label in "\(label): let v" } ?? "let v"
 
         return """
             public var \(name): Optic::Optic<\(root), \(root), \(paramType), \(paramType)>.Prism {
@@ -257,19 +254,19 @@ func generatePrism(for prismCase: PrismCase) -> String {
             """
     } else {
         let tupleTypes = prismCase.parameters.map { p in
-            p.label != nil ? "\(p.label!): \(p.type)" : p.type
+            p.label.map { label in "\(label): \(p.type)" } ?? p.type
         }.joined(separator: ", ")
 
         let embedArgs = prismCase.parameters.enumerated().map { i, p in
-            p.label != nil ? "\(p.label!): $0.\(i)" : "$0.\(i)"
+            p.label.map { label in "\(label): $0.\(i)" } ?? "$0.\(i)"
         }.joined(separator: ", ")
 
         let extractPatterns = prismCase.parameters.enumerated().map { i, p in
-            p.label != nil ? "\(p.label!): let v\(i)" : "let v\(i)"
+            p.label.map { label in "\(label): let v\(i)" } ?? "let v\(i)"
         }.joined(separator: ", ")
 
         let extractTuple = prismCase.parameters.enumerated().map { i, p in
-            p.label != nil ? "\(p.label!): v\(i)" : "v\(i)"
+            p.label.map { label in "\(label): v\(i)" } ?? "v\(i)"
         }.joined(separator: ", ")
 
         return """

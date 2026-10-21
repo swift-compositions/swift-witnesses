@@ -446,11 +446,10 @@ private func generateConstantMember(
 private func generateMockParameter(for property: ClosureProperty) -> String {
     let returnType = property.returnType.trimmedDescription
 
-    if property.returnsVoid {
-        return "\(property.methodName): Swift.Void = ()"
-    } else {
+    guard property.returnsVoid else {
         return "\(property.methodName): \(returnType)"
     }
+    return "\(property.methodName): Swift.Void = ()"
 }
 
 private func generateMockClosure(for property: ClosureProperty, isPublic: Bool) -> String {
@@ -950,7 +949,7 @@ private func generateCaseEnum(for properties: [ClosureProperty]) -> String {
         }.joined(separator: "\n                    ")
         initCases =
             explicit
-            + "\n                    default: self = .\(caseEnumCaseName(for: properties.last!.methodName))"
+            + "\n                    default: self = .\(caseEnumCaseName(for: properties[properties.count - 1].methodName))"
     }
 
     return """
@@ -1031,8 +1030,7 @@ struct NonClosureProperty {
     let type: String
 }
 
-private func extractNonClosureProperties(from structDecl: StructDeclSyntax) -> [NonClosureProperty]
-{
+private func extractNonClosureProperties(from structDecl: StructDeclSyntax) -> [NonClosureProperty] {
     var properties: [NonClosureProperty] = []
     for member in structDecl.memberBlock.members {
         guard let varDecl = member.decl.as(VariableDeclSyntax.self),
@@ -1417,11 +1415,10 @@ private func formatCallsConstruction(for property: ClosureProperty) -> String {
     }
     let args = copyableParams.map { param in
         let name = param.internalName
-        if let label = param.label {
-            return "\(label): \(name)"
-        } else {
+        guard let label = param.label else {
             return name
         }
+        return "\(label): \(name)"
     }.joined(separator: ", ")
     return ".\(property.methodName)(\(args))"
 }

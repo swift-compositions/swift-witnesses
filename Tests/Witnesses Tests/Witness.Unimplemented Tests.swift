@@ -248,8 +248,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 
     @Test
-    func `Optional closure observe before passes nil through`() throws(Witness.Unimplemented.Error)
-    {
+    func `Optional closure observe before passes nil through`() throws(Witness.Unimplemented.Error) {
         let log = Synchronization.Mutex<[String]>([])
         let base = OptionalCallbackAPI(
             onEvent: { _ in },

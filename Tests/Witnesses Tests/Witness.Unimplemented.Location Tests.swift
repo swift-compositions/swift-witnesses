@@ -1,5 +1,5 @@
-import Text
 import Testing
+import Text
 
 @testable import Witnesses
 
