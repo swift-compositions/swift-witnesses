@@ -154,6 +154,8 @@ struct UntypedExistentialSpellingAPI: Sendable {
     var implicitUntyped: @Sendable () throws -> Int
     var explicitAnySwiftError: @Sendable () throws(any Swift.Error) -> Int
 
+    // REASON: this fixture exercises the macro's handling of every existential error spelling.
+    // swiftlint:disable:next no_existential_throws
     var explicitAnyError: @Sendable () throws(any Error) -> Int
     var explicitSwiftError: @Sendable () throws(Swift.Error) -> Int
     var explicitError: @Sendable () throws(Error) -> Int
