@@ -13,8 +13,7 @@ Use this package when you describe a dependency as a struct of closures and want
 - `Witness.Values.merging(_:)` keeps every value of both, and the argument's value wins when both hold the same key.
 - `Witness.Access` captures the context when it is created and reads through the current context merged over it, so an override at the read site wins.
 - `Witness.Context.Escaped` carries both values and mode. `Witness.CapturedContext` and `Witness.Scope` carry only values, so their operation runs in whatever mode is current where it is called.
-- A `Witness.Scope` must be run. Destroying one without calling `Witness.Scope.run(_:)` traps.
-- `Witness.Cycle` returns its values in order and starts again after the last. `Witness.Sequence` returns its values in order and then keeps returning the last. Both trap when created empty.
+- `Witness.Cycle` returns its values in order and starts again after the last. `Witness.Sequence` returns its values in order and then keeps returning the last.
 - `@Witness` makes a method for every non-optional closure with at least one named parameter, and uses the parameter names as argument labels, so `(_ id: Int)` gives `fetch(id:)`. A closure with only unnamed parameters gets no method.
 - In `unimplemented()`, an operation that throws untyped errors, in any spelling, or `Witness.Unimplemented.Error` throws a `Witness.Unimplemented.Error`. An operation with another typed error throws that type's `unimplemented(_:)` case. A non-throwing operation, or one that throws `Never`, traps when called. Optional closures are nil.
 - A `Witness.Unimplemented.Error` from `unimplemented()` names the struct, the operation as `name(label:)`, and the place where `unimplemented()` was called.
