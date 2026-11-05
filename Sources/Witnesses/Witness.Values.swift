@@ -28,6 +28,7 @@ extension Witness {
 
 extension Witness.Values {
 
+    @safe
     @usableFromInline
     final class _Storage: @unchecked Sendable {
         @usableFromInline
