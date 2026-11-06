@@ -5,7 +5,9 @@ import Testing
 
 @testable import Witnesses
 
-extension Witness.Unimplemented {
+enum `Witness.Unimplemented Tests` {}
+
+extension `Witness.Unimplemented Tests` {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -15,7 +17,7 @@ extension Witness.Unimplemented {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `Macro-generated unimplemented throws on invocation`() async throws {
         let api = TestAPI.unimplemented()
@@ -57,7 +59,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.EdgeCase {
+extension `Witness.Unimplemented Tests`.Test.EdgeCase {
     @Test
     func `Multiple unimplemented calls have independent locations`() async throws {
         let api1 = TestAPI.unimplemented()
@@ -93,7 +95,7 @@ extension Witness.Unimplemented.Test.EdgeCase {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `Noncopyable driver unimplemented throws for throwing closures`() throws {
         let driver = NoncopyableDriverAPI.unimplemented()
@@ -219,7 +221,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `Optional closure unimplemented produces nil`() {
         let api = OptionalCallbackAPI.unimplemented()
@@ -301,7 +303,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `Restricted access struct compiles and works`() {
 
@@ -313,7 +315,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `Nonsending witness unimplemented compiles and throws`() async throws {
         let api = NonsendingAPI.unimplemented()
@@ -401,7 +403,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `Observe after receives outcome on success`() async throws {
         let log = Synchronization.Mutex<[String]>([])
@@ -450,7 +452,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `ExistingInitAPI compiles and works with custom init`() throws {
         let api = ExistingInitAPI(fetch: { id in "custom-\(id)" })
@@ -467,7 +469,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `Generated convenience method preserves typed throws`() async {
         let api = TestAPI.unimplemented()
@@ -482,7 +484,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `Untyped throwing operation throws Witness Unimplemented Error`() {
         let api = UnimplementedThrowsMatrixAPI.unimplemented()
@@ -543,7 +545,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `Every untyped existential spelling throws Witness Unimplemented Error directly`() {
         let api = UntypedExistentialSpellingAPI.unimplemented()
@@ -566,7 +568,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `Genuinely typed domain leaf error still routes through Representable`() {
         let api = TypedLeafNearMissAPI.unimplemented()
@@ -602,7 +604,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `Line-wrapped untyped existential throws Witness Unimplemented Error directly`() async {
         let api = LineWrappedUntypedExistentialAPI.unimplemented()
@@ -630,7 +632,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `Lifecycle-composed operation throws right notImplemented instead of crashing`() {
         let api = LifecycleComposedAPI.unimplemented()
@@ -649,7 +651,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.Unit {
+extension `Witness.Unimplemented Tests`.Test.Unit {
     @Test
     func `Nested witness struct compiles and works`() throws {
         let client = APINamespace.Client.unimplemented()
@@ -664,7 +666,7 @@ extension Witness.Unimplemented.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Test.Integration {
+extension `Witness.Unimplemented Tests`.Test.Integration {
     @Test
     func `Unimplemented in context scope`() async throws {
         try await Witness.Context.with { values in

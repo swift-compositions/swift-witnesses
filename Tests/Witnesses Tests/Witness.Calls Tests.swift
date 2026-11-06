@@ -2,7 +2,7 @@ import Testing
 
 @testable import Witnesses
 
-extension Witness.Test.Unit {
+extension `Witness Tests`.Test.Unit {
     @Test
     func `Witness with an operation literally named count expands and compiles`() {
 
@@ -52,7 +52,7 @@ enum VoidShadowingNamespace {
     }
 }
 
-extension Witness.Test.Unit {
+extension `Witness Tests`.Test.Unit {
     @Test
     func `Witness nested in a scope that declares its own Void expands and compiles`() {
         let ordinal = VoidShadowingNamespace.Client.Calls.Case.void.ordinal

@@ -2,7 +2,9 @@ import Testing
 
 @testable import Witnesses
 
-extension Witness.Values {
+enum `Witness.Values Tests` {}
+
+extension `Witness.Values Tests` {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -12,7 +14,7 @@ extension Witness.Values {
     }
 }
 
-extension Witness.Values.Test.Unit {
+extension `Witness.Values Tests`.Test.Unit {
     @Test
     func `Values container stores and retrieves witnesses`() async throws {
         var values = Witness.Values()
@@ -195,7 +197,7 @@ extension Witness.Values.Test.Unit {
     }
 }
 
-extension Witness.Values.Test.EdgeCase {
+extension `Witness.Values Tests`.Test.EdgeCase {
     @Test
     func `Overwriting a value replaces it`() async throws {
         var values = Witness.Values()
@@ -317,7 +319,7 @@ extension Witness.Values.Test.EdgeCase {
     }
 }
 
-extension Witness.Values.Test.Performance {
+extension `Witness.Values Tests`.Test.Performance {
     @Test
     func `Subscript access`() async throws {
         let values = Witness.Values()

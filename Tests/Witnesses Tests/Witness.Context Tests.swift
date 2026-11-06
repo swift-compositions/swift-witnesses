@@ -2,7 +2,9 @@ import Testing
 
 @testable import Witnesses
 
-extension Witness.Context {
+enum `Witness.Context Tests` {}
+
+extension `Witness.Context Tests` {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -12,7 +14,7 @@ extension Witness.Context {
     }
 }
 
-extension Witness.Context.Test.Unit {
+extension `Witness.Context Tests`.Test.Unit {
     @Test
     func `Context scoped override`() async throws {
 
@@ -119,7 +121,7 @@ extension Witness.Context.Test.Unit {
     }
 }
 
-extension Witness.Context.Test.EdgeCase {
+extension `Witness.Context Tests`.Test.EdgeCase {
     @Test
     func `Nested scopes override correctly`() async throws {
         try await Witness.Context.with { values in
@@ -175,7 +177,7 @@ extension Witness.Context.Test.EdgeCase {
     }
 }
 
-extension Witness.Context.Test.Integration {
+extension `Witness.Context Tests`.Test.Integration {
     @Test
     func `Synchronous with operation works`() throws {
         let result = try Witness.Context.with { values in
@@ -288,7 +290,7 @@ extension Witness.Context.Test.Integration {
     }
 }
 
-extension Witness.Context.Test.Performance {
+extension `Witness.Context Tests`.Test.Performance {
     @Test
     func `Scoped override overhead`() {
 

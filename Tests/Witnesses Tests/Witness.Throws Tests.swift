@@ -3,7 +3,7 @@ import Testing
 
 @testable import Witnesses
 
-extension Witness.Test.Unit {
+extension `Witness Tests`.Test.Unit {
     @Test
     func `Untyped throws derives any Error failure type`() throws {
         let error: any Swift.Error = CustomError.failed
@@ -73,7 +73,7 @@ extension Witness.Test.Unit {
     }
 }
 
-extension Witness.Test.Integration {
+extension `Witness Tests`.Test.Integration {
     @Test
     func `Observe after runs on untyped async throws failure path`() async throws {
         let base = ThrowsMatrixAPI(

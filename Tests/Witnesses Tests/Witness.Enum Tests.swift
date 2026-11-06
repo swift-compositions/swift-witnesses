@@ -15,14 +15,14 @@ enum KeywordCalls: Sendable {
     case `return`(value: String)
 }
 
-extension Witness.Test {
+extension `Witness Tests`.Test {
     @Suite
     struct `Enum` {
         @Suite struct Unit {}
     }
 }
 
-extension Witness.Test.Enum.Unit {
+extension `Witness Tests`.Test.Enum.Unit {
     @Test
     func `Computed property extracts Void for parameterless case`() {
         let action = TestCalls.load

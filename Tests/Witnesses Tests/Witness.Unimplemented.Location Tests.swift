@@ -3,7 +3,9 @@ import Text
 
 @testable import Witnesses
 
-extension Source.Location {
+enum `Source.Location Tests` {}
+
+extension `Source.Location Tests` {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -13,7 +15,7 @@ extension Source.Location {
     }
 }
 
-extension Source.Location.Test.Unit {
+extension `Source.Location Tests`.Test.Unit {
     @Test
     func `Location stores fileID, filePath, line, and column`() {
         let location = Source.Location(
@@ -58,7 +60,7 @@ extension Source.Location.Test.Unit {
     }
 }
 
-extension Source.Location.Test.EdgeCase {
+extension `Source.Location Tests`.Test.EdgeCase {
     @Test
     func `Location with empty fileID`() {
         let location = Source.Location(
@@ -112,7 +114,7 @@ extension Source.Location.Test.EdgeCase {
     }
 }
 
-extension Source.Location.Test.Integration {
+extension `Source.Location Tests`.Test.Integration {
     @Test
     func `Location equality`() {
         let loc1 = Source.Location(
@@ -162,7 +164,7 @@ extension Source.Location.Test.Integration {
     }
 }
 
-extension Source.Location.Test.Performance {
+extension `Source.Location Tests`.Test.Performance {
     @Test
     func `Location creation`() {
 

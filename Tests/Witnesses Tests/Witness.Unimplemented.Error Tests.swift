@@ -3,7 +3,9 @@ import Text
 
 @testable import Witnesses
 
-extension Witness.Unimplemented.Error {
+enum `Witness.Unimplemented.Error Tests` {}
+
+extension `Witness.Unimplemented.Error Tests` {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -13,7 +15,7 @@ extension Witness.Unimplemented.Error {
     }
 }
 
-extension Witness.Unimplemented.Error.Test.Unit {
+extension `Witness.Unimplemented.Error Tests`.Test.Unit {
     @Test
     func `Error stores witness, operation, and location`() {
         let location = Source.Location(
@@ -89,7 +91,7 @@ extension Witness.Unimplemented.Error.Test.Unit {
     }
 }
 
-extension Witness.Unimplemented.Error.Test.EdgeCase {
+extension `Witness.Unimplemented.Error Tests`.Test.EdgeCase {
     @Test
     func `Error with empty witness name`() {
         let location = Source.Location(
@@ -159,7 +161,7 @@ extension Witness.Unimplemented.Error.Test.EdgeCase {
     }
 }
 
-extension Witness.Unimplemented.Error.Test.Integration {
+extension `Witness.Unimplemented.Error Tests`.Test.Integration {
     @Test
     func `Error equality`() {
         let loc1 = Source.Location(
@@ -218,7 +220,7 @@ extension Witness.Unimplemented.Error.Test.Integration {
     }
 }
 
-extension Witness.Unimplemented.Error.Test.Performance {
+extension `Witness.Unimplemented.Error Tests`.Test.Performance {
     @Test
     func `Error creation`() {
         let location = Source.Location(

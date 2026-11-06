@@ -2,7 +2,9 @@ import Testing
 
 @testable import Witnesses
 
-extension Witness.Derive {
+enum `Witness.Derive Tests` {}
+
+extension `Witness.Derive Tests` {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -12,7 +14,7 @@ extension Witness.Derive {
     }
 }
 
-extension Witness.Derive.Test.Unit {
+extension `Witness.Derive Tests`.Test.Unit {
     @Test
     func `Mock generates static method with value parameters`() async throws {
 
@@ -77,7 +79,7 @@ extension Witness.Derive.Test.Unit {
     }
 }
 
-extension Witness.Derive.Test.Unit {
+extension `Witness.Derive Tests`.Test.Unit {
     @Test
     func `Generator callAsFunction returns closure result`() throws {
         let gen = IntGenerator(generate: { 42 })
@@ -101,7 +103,7 @@ extension Witness.Derive.Test.Unit {
     }
 }
 
-extension Witness.Derive.Test.EdgeCase {
+extension `Witness.Derive Tests`.Test.EdgeCase {
     @Test
     func `Mock with empty string value`() async throws {
         let api = MockableAPI.mock(
@@ -147,7 +149,7 @@ extension Witness.Derive.Test.EdgeCase {
     }
 }
 
-extension Witness.Derive.Test.Integration {
+extension `Witness.Derive Tests`.Test.Integration {
     @Test
     func `Mock in context scope`() async throws {
         let mockApi = MockableAPI.mock(
@@ -176,7 +178,7 @@ extension Witness.Derive.Test.Integration {
     }
 }
 
-extension Witness.Derive.Test.Performance {
+extension `Witness.Derive Tests`.Test.Performance {
     @Test
     func `Mock creation`() {
 

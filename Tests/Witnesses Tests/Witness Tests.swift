@@ -2,7 +2,9 @@ import Testing
 
 @testable import Witnesses
 
-extension Witness {
+enum `Witness Tests` {}
+
+extension `Witness Tests` {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -12,7 +14,7 @@ extension Witness {
     }
 }
 
-extension Witness.Test.Unit {
+extension `Witness Tests`.Test.Unit {
     @Test
     func `Key provides live and test values`() async throws {
         let live = TestAPI.liveValue
@@ -58,7 +60,7 @@ extension Witness.Test.Unit {
     }
 }
 
-extension Witness.Test.EdgeCase {
+extension `Witness Tests`.Test.EdgeCase {
     @Test
     func `Key works with zero id`() async throws {
         let api = TestAPI.liveValue
