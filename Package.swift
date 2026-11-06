@@ -67,7 +67,7 @@ let package = Package(
         .target(
             name: "Witnesses",
             dependencies: [
-                "Witnesses Macros",
+                .target(name: "Witnesses Macros"),
                 .product(name: "Witness", package: "swift-witness"),
                 .product(name: "Source", package: "swift-source"),
                 .product(name: "Ownership", package: "swift-ownership"),
@@ -79,7 +79,7 @@ let package = Package(
         .target(
             name: "Witnesses Macros",
             dependencies: [
-                "Witnesses Macros Implementation",
+                .target(name: "Witnesses Macros Implementation"),
                 .product(name: "Either", package: "swift-either"),
                 .product(name: "Witness", package: "swift-witness"),
                 .product(name: "Optic", package: "swift-optic"),
@@ -98,7 +98,7 @@ let package = Package(
         .target(
             name: "Witnesses Test Support",
             dependencies: [
-                "Witnesses"
+                .target(name: "Witnesses")
             ],
             path: "Tests/Support"
         ),
@@ -106,7 +106,7 @@ let package = Package(
             name: "Witnesses Tests",
             dependencies: [
                 .product(name: "Text", package: "swift-text"),
-                "Witnesses",
+                .target(name: "Witnesses"),
                 .product(name: "Either", package: "swift-either"),
                 .product(name: "Async Lifecycle", package: "swift-async"),
             ],
