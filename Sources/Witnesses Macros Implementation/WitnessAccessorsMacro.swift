@@ -43,7 +43,7 @@ extension WitnessAccessorsMacro: PeerMacro {
                 structName: structName,
                 accessModifier: accessModifier
             )
-        }.joined(separator: "\n\n    ")
+        }.joined(separator: accessorSeparator)
 
         let extensionDecl: DeclSyntax = """
             extension \(raw: structName) {
@@ -54,6 +54,9 @@ extension WitnessAccessorsMacro: PeerMacro {
         return [extensionDecl]
     }
 }
+
+/// Between two generated accessors: a blank line, then the extension body's indentation.
+private let accessorSeparator = "\n\n    "
 
 private struct AccessorClosureProperty {
     let name: String
