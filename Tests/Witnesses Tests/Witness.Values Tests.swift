@@ -36,7 +36,7 @@ extension `Witness.Values Tests`.Test.Unit {
     @Test
     func `Test mode returns testValue by default`() async throws {
 
-        await Witness.Context.withTest {
+        Witness.Context.withTest {
             let api = Witness.Context[TestAPI.self]
             Task {
                 let result = try await api.fetch(id: 1)

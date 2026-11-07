@@ -669,7 +669,7 @@ extension `Witness.Unimplemented Tests`.Test.Unit {
 extension `Witness.Unimplemented Tests`.Test.Integration {
     @Test
     func `Unimplemented in context scope`() async throws {
-        try await Witness.Context.with { values in
+        await Witness.Context.with { values in
             values[TestAPI.self] = .unimplemented()
         } operation: {
             let api = Witness.Context.current[TestAPI.self]

@@ -180,7 +180,7 @@ extension `Witness.Context Tests`.Test.EdgeCase {
 extension `Witness.Context Tests`.Test.Integration {
     @Test
     func `Synchronous with operation works`() throws {
-        let result = try Witness.Context.with { values in
+        let result = Witness.Context.with { values in
             values[TestAPI.self] = TestAPI(
                 fetch: { _ in "Sync" },
                 update: { _, _ in }
