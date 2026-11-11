@@ -1,18 +1,7 @@
+internal import Environment
+internal import ISO_9899
 import Synchronization
 import Witness
-
-#if canImport(Darwin)
-    import Darwin
-#elseif canImport(Glibc)
-
-    @preconcurrency import Glibc
-#elseif canImport(Musl)
-
-    @preconcurrency import Musl
-#elseif os(Windows)
-
-    import CRT
-#endif
 
 extension Witness {
 
@@ -21,7 +10,7 @@ extension Witness {
         private static let reported = Mutex<Set<ObjectIdentifier>>([])
 
         private static let strict: Bool =
-            unsafe getenv("DEPENDENCIES_STRICT").map { unsafe String(cString: $0) == "1" } ?? false
+            Environment.read("DEPENDENCIES_STRICT") == "1"
 
         static func testDefaultServedInLive<K: Witness.Key.Test>(_ key: K.Type)
         where K.Value: Copyable & Escapable {
@@ -39,8 +28,9 @@ extension Witness {
                 if strict { fatalError(message) }
                 let first = reported.withLock { $0.insert(ObjectIdentifier(K.self)).inserted }
                 if first {
-                    message.withCString { _ = fputs($0, stderr) }
-                    _ = fputs("\n", stderr)
+                    (message + "\n").withCString { (pointer) -> Void in
+                        unsafe ISO_9899.Stdio.put(pointer, to: .error)
+                    }
                 }
             #endif
         }
